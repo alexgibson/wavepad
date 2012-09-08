@@ -14,6 +14,7 @@
             -webkit-touch-callout: none; 
         } 
         body {
+            font:15px/20px Helvetica, Arial, Verdana, sans-serif;
             background: #7d7e7d;
             background: -moz-radial-gradient(center, ellipse cover, #7d7e7d 0%, #0e0e0e 100%);
             background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#7d7e7d), color-stop(100%,#0e0e0e));
@@ -23,14 +24,17 @@
             background: radial-gradient(ellipse at center, #7d7e7d 0%,#0e0e0e 100%);
         }
 
-        h1, h2 {
-            color: #ffffff;
-        }
-
         h1 {
-            text-transform: uppercase;
             margin: 0;
             padding: 0;
+            color: #ffffff;
+            font-size: 25px;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 13px;
         }
 
         .container {
@@ -98,6 +102,7 @@
             transition: background .1s ease-in-out;
             -webkit-filter: blur(15px);
             filter: blur(15px);
+            cursor: pointer;
         }
 
         .finger.active {
@@ -105,9 +110,15 @@
 
         }
 
-        .title, .oscillator, .filter, .output {
-            display: inline-block;
+        .oscillator, .filter, .output {
+            float: right;
             margin-bottom: 1em;
+            margin-left: 1em;
+        }
+
+        .title {
+            margin-top: 1em;
+            float: left;
         }
     </style>
     <script>
