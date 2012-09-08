@@ -19,7 +19,7 @@
     </div>
     <div class="oscillator">
         <h2>Waveform</h2>
-        <select id="waveform" onchange="sliderChange(this)">
+        <select id="waveform" onchange="wavepad.sliderChange(this)">
             <option value="0" selected>Sine</option>
             <option value="1">Square</option>
             <option value="2">Sawtooth</option>
@@ -28,7 +28,7 @@
     </div>
     <div class="filter">
         <h2>Filter</h2>
-        <select id="filter-type" onchange="filterChange(this)">
+        <select id="filter-type" onchange="wavepad.filterChange(this)">
             <option value="0" selected>Lowpass</option>
             <option value="1">Highpass</option>
             <option value="2">Bandpass</option>
@@ -41,7 +41,7 @@
     </div>
     <div class="output">
         <h2>Volume</h2>
-        <input id="volume" onchange="sliderChange(this)" type="range" min="0" max="1" step="0.01" value="1" />
+        <input id="volume" onchange="wavepad.sliderChange(this)" type="range" min="0" max="1" step="0.01" value="1" />
     </div>
     <div class="surface"><div class="finger"></div></div>  
 </div>
