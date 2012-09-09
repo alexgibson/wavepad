@@ -5,6 +5,8 @@ var wavepad = (function () {
         source,
         nodes = {},
         myAudioContext,
+        myAudioAnalyser,
+        mySpectrum,
         hasTouch = 'ontouchstart' in window || 'createTouch' in document,
         eventStart = hasTouch ? 'touchstart' : 'mousedown',
         eventMove = hasTouch ? 'touchmove' : 'mousemove',
@@ -48,9 +50,13 @@ var wavepad = (function () {
                 nodes.filter.type = filterType;
                 nodes.volume.gain.value = volumeInput;
 
+                myAudioAnalyser = myAudioContext.createAnalyser();
+                myAudioAnalyser.smoothingTimeConstant = 0.85;
+
                 source.connect(nodes.filter);
                 nodes.filter.connect(nodes.volume);
-                nodes.volume.connect(myAudioContext.destination);
+                nodes.volume.connect(myAudioAnalyser);
+                myAudioAnalyser.connect(myAudioContext.destination);
 
                 return source;
             },
@@ -66,13 +72,15 @@ var wavepad = (function () {
                 source = myAudioContext.createOscillator();
                 source.type = document.querySelector('#waveform').value; // sine wave
                 source = wavepad.routeSounds(source);
-                source.frequency.value = 512 - x;
+                source.frequency.value = x;
                 nodes.filter.frequency.value = 512 - y;
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
                 finger.className = 'finger active';
                 surface.className = 'surface pressed';
+
+                mySpectrum = setInterval(wavepad.drawSpectrum, 30);
 
                 surface.addEventListener(eventMove, wavepad.effect, false);
                 surface.addEventListener(eventEnd, wavepad.stop, false);
@@ -83,7 +91,7 @@ var wavepad = (function () {
                 var y = e.pageY - surface.offsetTop;
 
                 if (myAudioContext.activeSourceCount > 0) {
-                    source.frequency.value = 512 - x;
+                    source.frequency.value = x;
                     nodes.filter.frequency.value = 512 - y;
                     source.noteOff(0);
                 }
@@ -91,6 +99,10 @@ var wavepad = (function () {
                 finger.className = 'finger';
                 surface.className = 'surface';
 
+                setTimeout(function () {
+                    clearInterval(mySpectrum);
+                }, 2000);
+                
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
             },
@@ -100,6 +112,10 @@ var wavepad = (function () {
                 finger.className = 'finger';
                 surface.className = 'surface';
 
+                setTimeout(function () {
+                    clearInterval(mySpectrum);
+                }, 2000);
+
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
             },
@@ -108,7 +124,7 @@ var wavepad = (function () {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
                 if (myAudioContext.activeSourceCount > 0) {
-                    source.frequency.value = 512 - x;
+                    source.frequency.value = x;
                     nodes.filter.frequency.value = 512 - y;
                 }
 
@@ -134,7 +150,28 @@ var wavepad = (function () {
                         nodes.filter.type = slider.value;
                     }
                 }
-            }
+            },
+
+            drawSpectrum: function () {
+                var canvas = document.querySelector('canvas');
+                var ctx = canvas.getContext('2d');
+                var width = canvas.width;
+                var height = canvas.height;
+                var bar_width = 20;
+     
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(255,255,255,0.04)';
+     
+                var freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
+                myAudioAnalyser.getByteFrequencyData(freqByteData);
+     
+                var barCount = Math.round(width / bar_width);
+                for (var i = 0; i < barCount; i++) {
+                    var magnitude = freqByteData[i];
+                    // some values need adjusting to fit on the canvas
+                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * 1.05);
+                }
+        }
         };
 }());
 
