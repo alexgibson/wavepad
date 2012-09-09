@@ -1,7 +1,6 @@
 var wavepad = (function () {
 
-    var doc = document,
-        surface,
+    var surface,
         finger,
         source,
         nodes = {},
@@ -15,11 +14,18 @@ var wavepad = (function () {
         return {
 
             init: function () {
-                if('webkitAudioContext' in window) {
+                var doc = document;
+
+                if ('webkitAudioContext' in window || 'AudioContext' in window) {
                     myAudioContext = new webkitAudioContext() || AudioContext();
                 } else {
                     alert('Your browser does not support Web Audio API');
+                    return;
                 }
+
+                doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
+                doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
+                doc.getElementById('volume').addEventListener('change', wavepad.sliderChange, false);
 
                 surface = doc.querySelector('.surface');
                 surface.addEventListener(eventStart, wavepad.play, false);
@@ -53,7 +59,7 @@ var wavepad = (function () {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
 
-                if(myAudioContext.activeSourceCount > 0) {
+                if (myAudioContext.activeSourceCount > 0) {
                     wavepad.kill();
                 }
 
@@ -76,7 +82,7 @@ var wavepad = (function () {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
 
-                if(myAudioContext.activeSourceCount > 0) {
+                if (myAudioContext.activeSourceCount > 0) {
                     source.frequency.value = 512 - x;
                     nodes.filter.frequency.value = 512 - y;
                     source.noteOff(0);
@@ -101,7 +107,7 @@ var wavepad = (function () {
             effect: function (e) {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
-                if(myAudioContext.activeSourceCount > 0) {
+                if (myAudioContext.activeSourceCount > 0) {
                     source.frequency.value = 512 - x;
                     nodes.filter.frequency.value = 512 - y;
                 }
@@ -110,23 +116,21 @@ var wavepad = (function () {
             },
 
             sliderChange: function (slider) {
-                if(myAudioContext.activeSourceCount > 0) {
-                    if(slider.id == 'waveform') {
+                if (myAudioContext.activeSourceCount > 0) {
+                    if (slider.id == 'waveform') {
                         wavepad.stop();
                         wavepad.play();
-                    }
-                    else if(slider.id == 'frequency') {
+                    } else if (slider.id == 'frequency') {
                         source.frequency.value = slider.value;
-                    }
-                    else if(slider.id == 'volume') {
+                    } else if (slider.id == 'volume') {
                         nodes.volume.gain.value = slider.value;
                     }
                 }
             },
 
             filterChange: function (slider) {
-                if(myAudioContext.activeSourceCount > 0) {
-                    if(slider.id == 'filter-type') {
+                if (myAudioContext.activeSourceCount > 0) {
+                    if (slider.id == 'filter-type') {
                         nodes.filter.type = slider.value;
                     }
                 }
