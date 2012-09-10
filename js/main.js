@@ -160,7 +160,7 @@ var wavepad = (function () {
                 var bar_width = 20;
      
                 ctx.clearRect(0, 0, width, height);
-                ctx.fillStyle = 'rgba(255,255,255,0.04)';
+                ctx.fillStyle = '#1d1c25';
      
                 var freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
                 myAudioAnalyser.getByteFrequencyData(freqByteData);
@@ -169,9 +169,9 @@ var wavepad = (function () {
                 for (var i = 0; i < barCount; i++) {
                     var magnitude = freqByteData[i];
                     // some values need adjusting to fit on the canvas
-                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * 1.05);
+                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * 2);
                 }
-        }
+            }
         };
 }());
 
