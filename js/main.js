@@ -7,6 +7,7 @@ var wavepad = (function () {
         myAudioContext,
         myAudioAnalyser,
         mySpectrum,
+        impulseResponse,
         hasTouch = 'ontouchstart' in window || 'createTouch' in document,
         eventStart = hasTouch ? 'touchstart' : 'mousedown',
         eventMove = hasTouch ? 'touchmove' : 'mousemove',
@@ -24,6 +25,15 @@ var wavepad = (function () {
                     alert('Your browser does not support Web Audio API');
                     return;
                 }
+
+                var request = new XMLHttpRequest();
+                request.open("GET", "ir/impulse.wav", true);
+                request.responseType = "arraybuffer";
+                 
+                request.onload = function () {
+                    impulseResponse = myAudioContext.createBuffer(request.response, false);
+                }
+                request.send();
 
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
@@ -45,16 +55,20 @@ var wavepad = (function () {
                 var volumeInput = doc.querySelector('#volume').value;
 
                 nodes.filter = myAudioContext.createBiquadFilter();
+                nodes.convolver = myAudioContext.createConvolver();
                 nodes.volume = myAudioContext.createGainNode();
 
                 nodes.filter.type = filterType;
                 nodes.volume.gain.value = volumeInput;
+                nodes.convolver.buffer = impulseResponse;
 
                 myAudioAnalyser = myAudioContext.createAnalyser();
                 myAudioAnalyser.smoothingTimeConstant = 0.85;
 
                 source.connect(nodes.filter);
+                nodes.filter.connect(nodes.convolver);
                 nodes.filter.connect(nodes.volume);
+                nodes.convolver.connect(nodes.volume);
                 nodes.volume.connect(myAudioAnalyser);
                 myAudioAnalyser.connect(myAudioContext.destination);
 
@@ -160,7 +174,7 @@ var wavepad = (function () {
                 var bar_width = 20;
      
                 ctx.clearRect(0, 0, width, height);
-                ctx.fillStyle = 'rgba(255,255,255,0.04)';
+                ctx.fillStyle = '#1d1c25';
      
                 var freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
                 myAudioAnalyser.getByteFrequencyData(freqByteData);
@@ -169,9 +183,9 @@ var wavepad = (function () {
                 for (var i = 0; i < barCount; i++) {
                     var magnitude = freqByteData[i];
                     // some values need adjusting to fit on the canvas
-                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * 1.05);
+                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * 2);
                 }
-        }
+            }
         };
 }());
 
