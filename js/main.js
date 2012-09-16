@@ -38,6 +38,7 @@ var wavepad = (function () {
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
                 doc.getElementById('volume').addEventListener('change', wavepad.sliderChange, false);
+                doc.getElementById('pan').addEventListener('change', wavepad.sliderChange, false);
 
                 surface = doc.querySelector('.surface');
                 surface.addEventListener(eventStart, wavepad.play, false);
@@ -53,22 +54,26 @@ var wavepad = (function () {
                 var doc = document;
                 var filterType = doc.querySelector('#filter-type').value;
                 var volumeInput = doc.querySelector('#volume').value;
+                var panX = doc.querySelector('#pan').value;
 
                 nodes.filter = myAudioContext.createBiquadFilter();
                 nodes.convolver = myAudioContext.createConvolver();
                 nodes.volume = myAudioContext.createGainNode();
+                nodes.panner = myAudioContext.createPanner();
 
                 nodes.filter.type = filterType;
                 nodes.volume.gain.value = volumeInput;
                 nodes.convolver.buffer = impulseResponse;
+                nodes.panner.setPosition(panX, 0, 0);
 
                 myAudioAnalyser = myAudioContext.createAnalyser();
                 myAudioAnalyser.smoothingTimeConstant = 0.85;
 
                 source.connect(nodes.filter);
+                nodes.filter.connect(nodes.panner);
                 nodes.filter.connect(nodes.convolver);
-                nodes.filter.connect(nodes.volume);
-                nodes.convolver.connect(nodes.volume);
+                nodes.convolver.connect(nodes.panner);
+                nodes.panner.connect(nodes.volume);
                 nodes.volume.connect(myAudioAnalyser);
                 myAudioAnalyser.connect(myAudioContext.destination);
 
@@ -150,10 +155,12 @@ var wavepad = (function () {
                     if (slider.id == 'waveform') {
                         wavepad.stop();
                         wavepad.play();
-                    } else if (slider.id == 'frequency') {
+                    } else if (slider.id === 'frequency') {
                         source.frequency.value = slider.value;
-                    } else if (slider.id == 'volume') {
+                    } else if (slider.id === 'volume') {
                         nodes.volume.gain.value = slider.value;
+                    } else if (slider.id === 'pan') {
+                        nodes.panner.setPosition(slider.value, 0, 0);
                     }
                 }
             },
