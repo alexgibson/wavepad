@@ -99,7 +99,7 @@ var wavepad = (function () {
                 finger.className = 'finger active';
                 surface.className = 'surface pressed';
 
-                mySpectrum = setInterval(wavepad.drawSpectrum, 30);
+                wavepad.animateSpectrum();
 
                 surface.addEventListener(eventMove, wavepad.effect, false);
                 surface.addEventListener(eventEnd, wavepad.stop, false);
@@ -119,9 +119,9 @@ var wavepad = (function () {
                 surface.className = 'surface';
 
                 setTimeout(function () {
-                    clearInterval(mySpectrum);
-                }, 2000);
-                
+                    window.cancelAnimationFrame(mySpectrum);
+                }, 3000);
+
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
             },
@@ -132,8 +132,8 @@ var wavepad = (function () {
                 surface.className = 'surface';
 
                 setTimeout(function () {
-                    clearInterval(mySpectrum);
-                }, 2000);
+                    window.cancelAnimationFrame(mySpectrum);
+                }, 3000);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
@@ -145,9 +145,9 @@ var wavepad = (function () {
                 if (myAudioContext.activeSourceCount > 0) {
                     source.frequency.value = x;
                     nodes.filter.frequency.value = 512 - y;
+                    finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
                 }
 
-                finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
             },
 
             sliderChange: function (slider) {
@@ -171,6 +171,11 @@ var wavepad = (function () {
                         nodes.filter.type = slider.value;
                     }
                 }
+            },
+
+            animateSpectrum: function () {
+                mySpectrum = requestAnimationFrame(wavepad.animateSpectrum, document.querySelector('canvas'));
+                wavepad.drawSpectrum();
             },
 
             drawSpectrum: function () {
