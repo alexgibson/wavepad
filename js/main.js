@@ -45,7 +45,7 @@ var wavepad = (function () {
 
                 finger = doc.querySelector('.finger');
 
-                doc.addEventListener('touchmove', function (e) {
+                doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                     e.preventDefault();
                 });
             },
