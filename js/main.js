@@ -96,8 +96,8 @@ var wavepad = (function () {
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
-                finger.className = 'finger active';
-                surface.className = 'surface pressed';
+                finger.classList.add('active');
+                surface.classList.add('pressed');
 
                 wavepad.animateSpectrum();
 
@@ -115,8 +115,8 @@ var wavepad = (function () {
                     source.noteOff(0);
                 }
 
-                finger.className = 'finger';
-                surface.className = 'surface';
+                finger.classList.remove('active');
+                surface.classList.remove('pressed');
 
                 setTimeout(function () {
                     window.cancelAnimationFrame(mySpectrum);
@@ -128,8 +128,8 @@ var wavepad = (function () {
 
             kill: function () {
                 source.noteOff(0);
-                finger.className = 'finger';
-                surface.className = 'surface';
+                finger.classList.remove('active');
+                surface.classList.remove('pressed');
 
                 setTimeout(function () {
                     window.cancelAnimationFrame(mySpectrum);
