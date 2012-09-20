@@ -105,8 +105,8 @@ var wavepad = (function () {
                 source.frequency.value = x;
                 nodes.filter.frequency.value = 512 - y;
 
-                nodes.volume.gain.linearRampToValueAtTime(0, myAudioContext.currentTime);
-                nodes.volume.gain.linearRampToValueAtTime(0.2, myAudioContext.currentTime + 1);
+                // nodes.volume.gain.linearRampToValueAtTime(0, myAudioContext.currentTime);
+                // nodes.volume.gain.linearRampToValueAtTime(0.2, myAudioContext.currentTime + 1);
 
                 source.noteOn(0);
 
