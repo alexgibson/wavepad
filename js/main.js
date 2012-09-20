@@ -12,6 +12,7 @@ var wavepad = (function () {
         eventStart = hasTouch ? 'touchstart' : 'mousedown',
         eventMove = hasTouch ? 'touchmove' : 'mousemove',
         eventEnd = hasTouch ? 'touchend' : 'mouseup',
+        lastMove = 0,
         isMuted = false;
 
         return {
@@ -133,6 +134,8 @@ var wavepad = (function () {
                     window.cancelAnimationFrame(mySpectrum);
                 }, 3000);
 
+                lastMove = 0;
+
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
             },
@@ -146,6 +149,8 @@ var wavepad = (function () {
                     window.cancelAnimationFrame(mySpectrum);
                 }, 3000);
 
+                lastMove = 0;
+
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
             },
@@ -153,10 +158,12 @@ var wavepad = (function () {
             effect: function (e) {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
-                if (myAudioContext.activeSourceCount > 0) {
+                var currentTime = new Date();
+                if (myAudioContext.activeSourceCount > 0 && (currentTime - lastMove > 10)) {
                     source.frequency.value = x;
                     nodes.filter.frequency.value = 512 - y;
                     finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
+                    lastMove = currentTime;
                 }
 
             },
