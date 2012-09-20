@@ -104,6 +104,10 @@ var wavepad = (function () {
                 source = wavepad.routeSounds(source);
                 source.frequency.value = x;
                 nodes.filter.frequency.value = 512 - y;
+
+                nodes.volume.gain.linearRampToValueAtTime(0, myAudioContext.currentTime);
+                nodes.volume.gain.linearRampToValueAtTime(0.2, myAudioContext.currentTime + 0.3);
+
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
