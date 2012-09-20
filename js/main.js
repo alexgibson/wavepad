@@ -67,7 +67,7 @@ var wavepad = (function () {
                 }
 
                 nodes.filter.type = filterType;
-                nodes.volume.gain.value = 1;
+                nodes.volume.gain.value = 0.2;
                 
                 nodes.panner.setPosition(panX, 0, 0);
 
