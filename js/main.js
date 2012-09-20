@@ -146,9 +146,7 @@ var wavepad = (function () {
                 finger.classList.remove('active');
                 surface.classList.remove('pressed');
 
-                setTimeout(function () {
-                    window.cancelAnimationFrame(mySpectrum);
-                }, 3000);
+                window.cancelAnimationFrame(mySpectrum);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
