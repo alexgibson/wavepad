@@ -104,6 +104,7 @@ var wavepad = (function () {
                 source = wavepad.routeSounds(source);
                 source.frequency.value = x;
                 nodes.filter.frequency.value = 512 - y;
+
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
@@ -142,9 +143,7 @@ var wavepad = (function () {
                 finger.classList.remove('active');
                 surface.classList.remove('pressed');
 
-                setTimeout(function () {
-                    window.cancelAnimationFrame(mySpectrum);
-                }, 3000);
+                window.cancelAnimationFrame(mySpectrum);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
@@ -153,6 +152,7 @@ var wavepad = (function () {
             effect: function (e) {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
+
                 if (myAudioContext.activeSourceCount > 0) {
                     source.frequency.value = x;
                     nodes.filter.frequency.value = 512 - y;
