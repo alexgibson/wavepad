@@ -129,7 +129,21 @@
             float: left;
         }
 
-        #delay {
+        .delay {
+            position: relative;
+            width: 512px; 
+            height: 512px; 
+        }
+
+        .delay-time{
+            float: left;
+        }
+
+        .delay-feedback {
+            float: right;
+        }
+
+        #delay, #feedback {
             -webkit-appearance: none; 
             width: 200px;
             height: 44px;
@@ -140,7 +154,7 @@
             border-radius: 22px;
         }
 
-        #delay::-webkit-slider-thumb {  
+        #delay::-webkit-slider-thumb, #feedback::-webkit-slider-thumb {  
             -webkit-appearance: none; 
             width: 44px;
             height: 44px;
