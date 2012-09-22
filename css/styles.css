@@ -129,7 +129,7 @@
             float: left;
         }
 
-        #pan {
+        #delay {
             -webkit-appearance: none; 
             width: 200px;
             height: 44px;
@@ -140,7 +140,7 @@
             border-radius: 22px;
         }
 
-        #pan::-webkit-slider-thumb {  
+        #delay::-webkit-slider-thumb {  
             -webkit-appearance: none; 
             width: 44px;
             height: 44px;
