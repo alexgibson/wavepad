@@ -45,6 +45,13 @@
             text-decoration: none;
         }
 
+        footer {
+            display: block;
+            width: 512px;
+            padding-top: 3em;
+            overflow: hidden;
+        }
+
         .container {
             width: 512px; 
             margin: 0 auto; 
@@ -131,7 +138,7 @@
 
         .delay {
             position: relative;
-            width: 512px; 
+            width: 512px;  
         }
 
         .delay-time{
