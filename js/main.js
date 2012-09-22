@@ -29,6 +29,7 @@ var wavepad = (function () {
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
                 doc.getElementById('delay').addEventListener('change', wavepad.sliderChange, false);
+                doc.getElementById('feedback').addEventListener('change', wavepad.sliderChange, false);
 
                 surface = doc.querySelector('.surface');
                 surface.addEventListener(eventStart, wavepad.play, false);
@@ -44,6 +45,7 @@ var wavepad = (function () {
                 var doc = document;
                 var filterType = doc.querySelector('#filter-type').value;
                 var delay = doc.querySelector('#delay').value;
+                var feedback = doc.querySelector('#feedback').value;
 
                 nodes.filter = myAudioContext.createBiquadFilter();  
                 nodes.volume = myAudioContext.createGainNode();
@@ -52,7 +54,7 @@ var wavepad = (function () {
 
                 nodes.filter.type = filterType;
                 nodes.volume.gain.value = 0.2;
-                nodes.feedbackGain.gain.value = 0.8;
+                nodes.feedbackGain.gain.value = feedback;
                 nodes.delay.delayTime.value = delay;
 
                 myAudioAnalyser = myAudioContext.createAnalyser();
@@ -149,6 +151,8 @@ var wavepad = (function () {
                         source.frequency.value = slider.value;
                     } else if (slider.id === 'delay') {
                         nodes.delay.delayTime.value = slider.value;
+                    } else if (slider.id === 'feedback') {
+                        nodes.feedbackGain.gain.value = slider.value;
                     }
                 }
             },
