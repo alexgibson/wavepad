@@ -26,19 +26,9 @@ var wavepad = (function () {
                     return;
                 }
 
-                var request = new XMLHttpRequest();
-                request.open("GET", "ir/impulse.mp3", true);
-                request.responseType = "arraybuffer";
-                 
-                request.onload = function () {
-                    impulseResponse = myAudioContext.createBuffer(request.response, false);
-                }
-                request.send();
-
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
-                doc.getElementById('pan').addEventListener('change', wavepad.sliderChange, false);
-                doc.getElementById('reverb').addEventListener('click', wavepad.toggleReverb, false);
+                doc.getElementById('delay').addEventListener('change', wavepad.sliderChange, false);
 
                 surface = doc.querySelector('.surface');
                 surface.addEventListener(eventStart, wavepad.play, false);
@@ -53,38 +43,27 @@ var wavepad = (function () {
             routeSounds: function (source) {
                 var doc = document;
                 var filterType = doc.querySelector('#filter-type').value;
-                var reverb = doc.querySelector('#reverb').innerHTML.toLowerCase();
-                var panX = doc.querySelector('#pan').value;
+                var delay = doc.querySelector('#delay').value;
 
-                nodes.filter = myAudioContext.createBiquadFilter();
-                
+                nodes.filter = myAudioContext.createBiquadFilter();  
                 nodes.volume = myAudioContext.createGainNode();
-                nodes.panner = myAudioContext.createPanner();
-
-                if (reverb === 'on') {
-                    nodes.convolver = myAudioContext.createConvolver();
-                    nodes.convolver.buffer = impulseResponse;
-                }
+                nodes.delay = myAudioContext.createDelayNode();
+                nodes.feedbackGain = myAudioContext.createGainNode();
 
                 nodes.filter.type = filterType;
                 nodes.volume.gain.value = 0.2;
-                
-                nodes.panner.setPosition(panX, 0, 0);
+                nodes.feedbackGain.gain.value = 0.8;
+                nodes.delay.delayTime.value = delay;
 
                 myAudioAnalyser = myAudioContext.createAnalyser();
                 myAudioAnalyser.smoothingTimeConstant = 0.85;
 
                 source.connect(nodes.filter);
-                nodes.filter.connect(nodes.panner);
-
-                if (reverb === 'on') {
-                    nodes.filter.connect(nodes.convolver);
-                    nodes.convolver.connect(nodes.panner);
-                } else {
-                    nodes.filter.connect(nodes.panner);
-                }
-                
-                nodes.panner.connect(nodes.volume);
+                nodes.filter.connect(nodes.volume);
+                nodes.filter.connect(nodes.delay);
+                nodes.delay.connect(nodes.feedbackGain);
+                nodes.feedbackGain.connect(nodes.volume);
+                nodes.feedbackGain.connect(nodes.delay);
                 nodes.volume.connect(myAudioAnalyser);
                 myAudioAnalyser.connect(myAudioContext.destination);
 
@@ -132,7 +111,7 @@ var wavepad = (function () {
 
                 setTimeout(function () {
                     window.cancelAnimationFrame(mySpectrum);
-                }, 3000);
+                }, 10000);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
@@ -168,8 +147,8 @@ var wavepad = (function () {
                         wavepad.play();
                     } else if (slider.id === 'frequency') {
                         source.frequency.value = slider.value;
-                    } else if (slider.id === 'pan') {
-                        nodes.panner.setPosition(slider.value, 0, 0);
+                    } else if (slider.id === 'delay') {
+                        nodes.delay.delayTime.value = slider.value;
                     }
                 }
             },
@@ -179,18 +158,6 @@ var wavepad = (function () {
                     if (slider.id == 'filter-type') {
                         nodes.filter.type = slider.value;
                     }
-                }
-            },
-
-            toggleReverb: function () {
-                var doc = document;
-                var button = doc.querySelector('#reverb');
-                var state = button.innerHTML.toLowerCase();
-
-                if (state === 'on') {
-                    button.innerHTML = 'Off';
-                } else {
-                    button.innerHTML = 'On';
                 }
             },
 
