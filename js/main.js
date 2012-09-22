@@ -27,7 +27,7 @@ var wavepad = (function () {
                 }
 
                 var request = new XMLHttpRequest();
-                request.open("GET", "ir/impulse.wav", true);
+                request.open("GET", "ir/impulse.mp3", true);
                 request.responseType = "arraybuffer";
                  
                 request.onload = function () {
