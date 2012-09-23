@@ -1,5 +1,7 @@
 var wavepad = (function () {
 
+    'use strict';
+
     var surface,
         finger,
         source,
