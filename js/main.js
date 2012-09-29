@@ -30,8 +30,9 @@ var wavepad = (function () {
 
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
-                doc.getElementById('delay').addEventListener('change', wavepad.sliderChange, false);
-                doc.getElementById('feedback').addEventListener('change', wavepad.sliderChange, false);
+                //doc.getElementById('delay').addEventListener('change', wavepad.sliderChange, false);
+                doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
+                doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
 
                 surface = doc.querySelector('.surface');
                 surface.addEventListener(eventStart, wavepad.play, false);
@@ -42,6 +43,7 @@ var wavepad = (function () {
                     e.preventDefault();
                 });
 
+                wavepad.updateOutputs();
                 wavepad.routeSounds();
             },
 
@@ -156,6 +158,12 @@ var wavepad = (function () {
 
             },
 
+            updateOutputs: function (e) {
+                var doc = document;
+                doc.getElementById('delay-output').value = doc.getElementById('delay').value;
+                doc.getElementById('feedback-output').value = doc.getElementById('feedback').value;
+            },
+
             sliderChange: function (slider) {
                 if (myAudioContext.activeSourceCount > 0) {
                     if (slider.id == 'waveform') {
@@ -169,6 +177,7 @@ var wavepad = (function () {
                         nodes.feedbackGain.gain.value = slider.value;
                     }
                 }
+                wavepad.updateOutputs();
             },
 
             filterChange: function (slider) {

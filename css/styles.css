@@ -45,6 +45,11 @@
             text-decoration: none;
         }
 
+        output {
+            display: block;
+            color: #ffffff;
+        }
+
         footer {
             display: block;
             width: 512px;
