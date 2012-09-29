@@ -41,13 +41,18 @@ var wavepad = (function () {
                 doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                     e.preventDefault();
                 });
+
+                wavepad.routeSounds();
             },
 
-            routeSounds: function (source) {
+            routeSounds: function () {
                 var doc = document;
                 var filterType = doc.querySelector('#filter-type').value;
                 var delay = doc.querySelector('#delay').value;
                 var feedback = doc.querySelector('#feedback').value;
+
+                source = myAudioContext.createOscillator();
+                source.type = doc.querySelector('#waveform').value; // sine wave
 
                 nodes.filter = myAudioContext.createBiquadFilter();  
                 nodes.volume = myAudioContext.createGainNode();
@@ -70,8 +75,6 @@ var wavepad = (function () {
                 nodes.feedbackGain.connect(nodes.delay);
                 nodes.volume.connect(myAudioAnalyser);
                 myAudioAnalyser.connect(myAudioContext.destination);
-
-                return source;
             },
 
             play: function (e) {
@@ -82,12 +85,9 @@ var wavepad = (function () {
                     wavepad.kill();
                 }
 
-                source = myAudioContext.createOscillator();
-                source.type = document.querySelector('#waveform').value; // sine wave
-                source = wavepad.routeSounds(source);
+                wavepad.routeSounds();
                 source.frequency.value = x;
                 nodes.filter.frequency.value = 512 - y;
-
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
@@ -98,6 +98,10 @@ var wavepad = (function () {
 
                 surface.addEventListener(eventMove, wavepad.effect, false);
                 surface.addEventListener(eventEnd, wavepad.stop, false);
+
+                if (hasTouch) {
+                    surface.addEventListener('touchcancel', wavepad.kill, false);
+                }
             },
 
             stop: function (e) {
@@ -119,6 +123,10 @@ var wavepad = (function () {
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
+
+                if (hasTouch) {
+                    surface.removeEventListener('touchcancel', wavepad.kill, false);
+                }
             },
 
             kill: function () {
@@ -130,6 +138,10 @@ var wavepad = (function () {
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
+
+                if (hasTouch) {
+                    surface.removeEventListener('touchcancel', wavepad.kill, false);
+                }
             },
 
             effect: function (e) {
