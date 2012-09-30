@@ -66,6 +66,7 @@
         .surface {
             position: relative;
             overflow: hidden;
+            clear: both;
             width: 512px; 
             height: 512px; 
             border: 5px solid #d81f38;
@@ -163,6 +164,7 @@
             -webkit-border-radius: 22px;
             -moz-border-radius: 22px;
             border-radius: 22px;
+            color: #ffffff;
         }
 
         #delay::-webkit-slider-thumb, #feedback::-webkit-slider-thumb {  
