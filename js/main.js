@@ -30,7 +30,6 @@ var wavepad = (function () {
 
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
-                //doc.getElementById('delay').addEventListener('change', wavepad.sliderChange, false);
                 doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
                 doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
 
