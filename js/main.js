@@ -94,9 +94,7 @@ var wavepad = (function () {
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
                 finger.classList.add('active');
-                surface.classList.add('pressed');
-
-                wavepad.animateSpectrum();
+                surface.classList.add('pressed');                
 
                 surface.addEventListener(eventMove, wavepad.effect, false);
                 surface.addEventListener(eventEnd, wavepad.stop, false);
@@ -104,6 +102,8 @@ var wavepad = (function () {
                 if (hasTouch) {
                     surface.addEventListener('touchcancel', wavepad.kill, false);
                 }
+
+                wavepad.animateSpectrum();
             },
 
             stop: function (e) {
@@ -160,7 +160,7 @@ var wavepad = (function () {
 
             updateOutputs: function (e) {
                 var doc = document;
-                doc.getElementById('delay-output').value = doc.getElementById('delay').value;
+                doc.getElementById('delay-output').value = Math.round(doc.getElementById('delay').value * 1000) + ' ms';
                 doc.getElementById('feedback-output').value = doc.getElementById('feedback').value;
             },
 
