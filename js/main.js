@@ -62,12 +62,12 @@ var wavepad = (function () {
 
             routeSounds: function () {
                 var doc = document;
-                var filterType = doc.querySelector('#filter-type').value;
-                var delay = doc.querySelector('#delay').value;
-                var feedback = doc.querySelector('#feedback').value;
+                var filterType = doc.getElementById('filter-type').value;
+                var delay = doc.getElementById('delay').value;
+                var feedback = doc.getElementById('feedback').value;
 
                 source = myAudioContext.createOscillator();
-                source.type = doc.querySelector('#waveform').value; // sine wave
+                source.type = doc.getElementById('waveform').value; // sine wave
 
                 nodes.filter = myAudioContext.createBiquadFilter();  
                 nodes.volume = myAudioContext.createGainNode();
