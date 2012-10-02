@@ -57,6 +57,7 @@ var wavepad = (function () {
 
                 wavepad.updateOutputs();
                 wavepad.routeSounds();
+                wavepad.animateSpectrum();
             },
 
             routeSounds: function () {
@@ -115,8 +116,6 @@ var wavepad = (function () {
                 if (hasTouch) {
                     surface.addEventListener('touchcancel', wavepad.kill, false);
                 }
-
-                wavepad.animateSpectrum();
             },
 
             stop: function (e) {
@@ -133,9 +132,9 @@ var wavepad = (function () {
                 finger.classList.remove('active');
                 surface.classList.remove('pressed');
 
-                setTimeout(function () {
-                    window.cancelAnimationFrame(mySpectrum);
-                }, 10000);
+                // setTimeout(function () {
+                //     window.cancelAnimationFrame(mySpectrum);
+                // }, 10000);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
@@ -150,7 +149,7 @@ var wavepad = (function () {
                 finger.classList.remove('active');
                 surface.classList.remove('pressed');
 
-                window.cancelAnimationFrame(mySpectrum);
+                // window.cancelAnimationFrame(mySpectrum);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
