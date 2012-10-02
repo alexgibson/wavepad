@@ -14,6 +14,7 @@ var wavepad = (function () {
         eventStart = hasTouch ? 'touchstart' : 'mousedown',
         eventMove = hasTouch ? 'touchmove' : 'mousemove',
         eventEnd = hasTouch ? 'touchend' : 'mouseup',
+        isSmallViewport = false,
         isMuted = false;
 
         return {
@@ -26,6 +27,18 @@ var wavepad = (function () {
                 } else {
                     alert('Your browser does not support Web Audio API');
                     return;
+                }
+
+                if (window.matchMedia) {
+                    isSmallViewport = window.matchMedia("(max-width: 512px)").matches ? true : false;
+
+                    window.matchMedia("(max-width: 512px)").addListener(function (mql) {
+                        if (mql.matches) {
+                            isSmallViewport = true;
+                        } else {
+                            isSmallViewport = false;
+                        }
+                    });
                 }
 
                 doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
@@ -81,14 +94,15 @@ var wavepad = (function () {
             play: function (e) {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
+                var multiplier = isSmallViewport ? 2 : 1;
 
                 if (myAudioContext.activeSourceCount > 0) {
                     wavepad.kill();
                 }
 
                 wavepad.routeSounds();
-                source.frequency.value = x;
-                nodes.filter.frequency.value = 512 - y;
+                source.frequency.value = x * multiplier;
+                nodes.filter.frequency.value = 512 - (y * multiplier);
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
@@ -108,10 +122,11 @@ var wavepad = (function () {
             stop: function (e) {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
+                var multiplier = isSmallViewport ? 2 : 1;
 
                 if (myAudioContext.activeSourceCount > 0) {
-                    source.frequency.value = x;
-                    nodes.filter.frequency.value = 512 - y;
+                    source.frequency.value = x * multiplier;
+                    nodes.filter.frequency.value = 512 - (y * multiplier);
                     source.noteOff(0);
                 }
 
@@ -148,10 +163,11 @@ var wavepad = (function () {
             effect: function (e) {
                 var x = e.pageX - surface.offsetLeft;
                 var y = e.pageY - surface.offsetTop;
+                var multiplier = isSmallViewport ? 2 : 1;
 
                 if (myAudioContext.activeSourceCount > 0) {
-                    source.frequency.value = x;
-                    nodes.filter.frequency.value = 512 - y;
+                    source.frequency.value = x * multiplier;
+                    nodes.filter.frequency.value = 512 - (y * multiplier);
                     finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
                 }
 
@@ -195,9 +211,14 @@ var wavepad = (function () {
             drawSpectrum: function () {
                 var canvas = document.querySelector('canvas');
                 var ctx = canvas.getContext('2d');
-                var width = canvas.width;
-                var height = canvas.height;
-                var bar_width = 20;
+                var canvasSize = isSmallViewport ? 256 : 512;
+                var multiplier = isSmallViewport ? 1 : 2;
+                var width = canvasSize;
+                var height = canvasSize;
+                var bar_width = isSmallViewport ? 10 : 20;
+
+                canvas.width = canvasSize - 10;
+                canvas.height = canvasSize - 10;
      
                 ctx.clearRect(0, 0, width, height);
                 ctx.fillStyle = '#1d1c25';
@@ -209,7 +230,7 @@ var wavepad = (function () {
                 for (var i = 0; i < barCount; i++) {
                     var magnitude = freqByteData[i];
                     // some values need adjusting to fit on the canvas
-                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * 2);
+                    ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * multiplier);
                 }
             }
         };

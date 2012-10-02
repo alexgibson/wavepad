@@ -131,7 +131,13 @@
 
         }
 
-        .oscillator, .filter, .reverb {
+        canvas { 
+            -webkit-border-radius: 15px;
+            -moz-border-radius: 15px;
+            border-radius: 15px;
+        }
+
+        .oscillator, .filter {
             float: right;
             margin-bottom: 1em;
             margin-left: 1em;
@@ -182,3 +188,55 @@
             background: -o-linear-gradient(top, rgb(253,253,253), rgb(190,190,190));
             background: linear-gradient(top, rgb(253,253,253), rgb(190,190,190));
         }
+
+        @media only screen and (max-width : 512px) {
+
+            footer {
+                width: 256px;
+            }
+
+            .container {
+                width: 256px; 
+            }
+
+            .title {
+                float: none;
+                margin: 1em auto 0 auto;
+            }
+
+            .oscillator, .filter {
+                float: none;
+                display: inline-block;
+                margin: 1em 0;
+            }
+
+            .surface {
+                width: 256px; 
+                height: 256px; 
+            }
+
+            .surface:before {
+                height: 118px;
+                width: 246px;
+            }
+
+            .surface:after {
+                height: 246px;
+                width: 118px;
+            }
+
+            .delay {
+                width: 246px;  
+            }
+
+            .delay-time{
+                float: none;
+                margin: 0 auto;
+            }
+
+            .delay-feedback {
+                float: none;
+                margin: 0 auto;
+            }
+
+        } 
