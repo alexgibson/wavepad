@@ -107,8 +107,7 @@ var wavepad = (function () {
                 source.noteOn(0);
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
-                finger.classList.add('active');
-                surface.classList.add('pressed');                
+                finger.classList.add('active');               
 
                 surface.addEventListener(eventMove, wavepad.effect, false);
                 surface.addEventListener(eventEnd, wavepad.stop, false);
@@ -130,11 +129,6 @@ var wavepad = (function () {
                 }
 
                 finger.classList.remove('active');
-                surface.classList.remove('pressed');
-
-                // setTimeout(function () {
-                //     window.cancelAnimationFrame(mySpectrum);
-                // }, 10000);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
@@ -147,9 +141,6 @@ var wavepad = (function () {
             kill: function () {
                 source.noteOff(0);
                 finger.classList.remove('active');
-                surface.classList.remove('pressed');
-
-                // window.cancelAnimationFrame(mySpectrum);
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
                 surface.removeEventListener(eventEnd, wavepad.stop, false);
