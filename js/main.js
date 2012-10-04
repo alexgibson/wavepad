@@ -54,7 +54,11 @@ var wavepad = (function () {
                 doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                     e.preventDefault();
                 });
-
+                
+                nodes.filter = myAudioContext.createBiquadFilter();  
+                nodes.volume = myAudioContext.createGainNode();
+                nodes.delay = myAudioContext.createDelayNode();
+                nodes.feedbackGain = myAudioContext.createGainNode();
                 
                 myAudioAnalyser = myAudioContext.createAnalyser();
                 myAudioAnalyser.smoothingTimeConstant = 0.85;
@@ -67,11 +71,7 @@ var wavepad = (function () {
                 var doc = document;
 
                 source = myAudioContext.createOscillator();
-                nodes.filter = myAudioContext.createBiquadFilter();  
-                nodes.volume = myAudioContext.createGainNode();
-                nodes.delay = myAudioContext.createDelayNode();
-                nodes.feedbackGain = myAudioContext.createGainNode();
-                
+
                 source.type = doc.getElementById('waveform').value;     
                 nodes.filter.type = doc.getElementById('filter-type').value;
                 nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
@@ -140,7 +140,7 @@ var wavepad = (function () {
                 if (myAudioContext.activeSourceCount > 0) {
                     source.noteOff(0);
                 }
-                
+
                 finger.classList.remove('active');
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
