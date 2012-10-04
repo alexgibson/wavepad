@@ -51,9 +51,17 @@ var wavepad = (function () {
 
                 finger = doc.querySelector('.finger');
 
-                // doc.querySelector('.surface').addEventListener('touchmove', function (e) {
-                //     e.preventDefault();
-                // });
+                doc.querySelector('.surface').addEventListener('touchmove', function (e) {
+                    e.preventDefault();
+                });
+                
+                nodes.filter = myAudioContext.createBiquadFilter();  
+                nodes.volume = myAudioContext.createGainNode();
+                nodes.delay = myAudioContext.createDelayNode();
+                nodes.feedbackGain = myAudioContext.createGainNode();
+                
+                myAudioAnalyser = myAudioContext.createAnalyser();
+                myAudioAnalyser.smoothingTimeConstant = 0.85;
 
                 wavepad.updateOutputs();
                 wavepad.animateSpectrum();
@@ -61,25 +69,14 @@ var wavepad = (function () {
 
             routeSounds: function () {
                 var doc = document;
-                var filterType = doc.getElementById('filter-type').value;
-                var delay = doc.getElementById('delay').value;
-                var feedback = doc.getElementById('feedback').value;
 
                 source = myAudioContext.createOscillator();
-                source.type = doc.getElementById('waveform').value; // sine wave
 
-                nodes.filter = myAudioContext.createBiquadFilter();  
-                nodes.volume = myAudioContext.createGainNode();
-                nodes.delay = myAudioContext.createDelayNode();
-                nodes.feedbackGain = myAudioContext.createGainNode();
-
-                nodes.filter.type = filterType;
+                source.type = doc.getElementById('waveform').value;     
+                nodes.filter.type = doc.getElementById('filter-type').value;
+                nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
+                nodes.delay.delayTime.value = doc.getElementById('delay').value;
                 nodes.volume.gain.value = 0.2;
-                nodes.feedbackGain.gain.value = feedback;
-                nodes.delay.delayTime.value = delay;
-
-                myAudioAnalyser = myAudioContext.createAnalyser();
-                myAudioAnalyser.smoothingTimeConstant = 0.85;
 
                 source.connect(nodes.filter);
                 nodes.filter.connect(nodes.volume);
@@ -125,6 +122,7 @@ var wavepad = (function () {
                     source.frequency.value = x * multiplier;
                     nodes.filter.frequency.value = 512 - (y * multiplier);
                     source.noteOff(0);
+                    wavepad.routeSounds();
                 }
 
                 finger.classList.remove('active');
@@ -138,7 +136,11 @@ var wavepad = (function () {
             },
 
             kill: function () {
-                source.noteOff(0);
+
+                if (myAudioContext.activeSourceCount > 0) {
+                    source.noteOff(0);
+                }
+
                 finger.classList.remove('active');
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
@@ -157,9 +159,9 @@ var wavepad = (function () {
                 if (myAudioContext.activeSourceCount > 0) {
                     source.frequency.value = x * multiplier;
                     nodes.filter.frequency.value = 512 - (y * multiplier);
-                    finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
                 }
 
+                finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
             },
 
             updateOutputs: function (e) {
