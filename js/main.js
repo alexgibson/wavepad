@@ -122,7 +122,6 @@ var wavepad = (function () {
                     source.frequency.value = x * multiplier;
                     nodes.filter.frequency.value = 512 - (y * multiplier);
                     source.noteOff(0);
-                    wavepad.routeSounds();
                 }
 
                 finger.classList.remove('active');
