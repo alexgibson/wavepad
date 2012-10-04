@@ -51,9 +51,9 @@ var wavepad = (function () {
 
                 finger = doc.querySelector('.finger');
 
-                // doc.querySelector('.surface').addEventListener('touchmove', function (e) {
-                //     e.preventDefault();
-                // });
+                doc.querySelector('.surface').addEventListener('touchmove', function (e) {
+                    e.preventDefault();
+                });
 
                 wavepad.updateOutputs();
                 wavepad.animateSpectrum();
