@@ -55,7 +55,11 @@ var wavepad = (function () {
                     e.preventDefault();
                 });
 
+                myAudioAnalyser = myAudioContext.createAnalyser();
+                myAudioAnalyser.smoothingTimeConstant = 0.85;
+
                 wavepad.updateOutputs();
+                wavepad.routeSounds();
                 wavepad.animateSpectrum();
             },
 
@@ -78,9 +82,6 @@ var wavepad = (function () {
                 nodes.feedbackGain.gain.value = feedback;
                 nodes.delay.delayTime.value = delay;
 
-                myAudioAnalyser = myAudioContext.createAnalyser();
-                myAudioAnalyser.smoothingTimeConstant = 0.85;
-
                 source.connect(nodes.filter);
                 nodes.filter.connect(nodes.volume);
                 nodes.filter.connect(nodes.delay);
@@ -100,7 +101,7 @@ var wavepad = (function () {
                     wavepad.kill();
                 }
 
-                wavepad.routeSounds();
+                //wavepad.routeSounds();
                 source.frequency.value = x * multiplier;
                 nodes.filter.frequency.value = 512 - (y * multiplier);
                 source.noteOn(0);
@@ -125,6 +126,7 @@ var wavepad = (function () {
                     source.frequency.value = x * multiplier;
                     nodes.filter.frequency.value = 512 - (y * multiplier);
                     source.noteOff(0);
+                    wavepad.routeSounds();
                 }
 
                 finger.classList.remove('active');
