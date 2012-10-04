@@ -60,7 +60,6 @@ var wavepad = (function () {
                 myAudioAnalyser.smoothingTimeConstant = 0.85;
 
                 wavepad.updateOutputs();
-                wavepad.routeSounds();
                 wavepad.animateSpectrum();
             },
 
@@ -98,7 +97,7 @@ var wavepad = (function () {
                     wavepad.kill();
                 }
 
-                //wavepad.routeSounds();
+                wavepad.routeSounds();
                 source.frequency.value = x * multiplier;
                 nodes.filter.frequency.value = 512 - (y * multiplier);
                 source.noteOn(0);
@@ -137,7 +136,11 @@ var wavepad = (function () {
             },
 
             kill: function () {
-                source.noteOff(0);
+
+                if (myAudioContext.activeSourceCount > 0) {
+                    source.noteOff(0);
+                }
+                
                 finger.classList.remove('active');
 
                 surface.removeEventListener(eventMove, wavepad.effect, false);
