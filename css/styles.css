@@ -189,6 +189,16 @@
             background: linear-gradient(top, rgb(253,253,253), rgb(190,190,190));
         }
 
+        select { 
+            width: 100px;
+            height: 33px;
+            padding: 5px;
+            background: #100e16;
+            border: 1px solid #0e0e0e;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
         @media only screen and (max-width : 512px) {
 
             footer {
