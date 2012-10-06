@@ -19,10 +19,11 @@
         }
 
         h1 {
+            font-family: AvenirNextCondensed-Heavy, Helvetica, Arial, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             color: #ffffff;
-            font-size: 25px;
+            font-size: 30px;
             text-transform: uppercase;
         }
 
@@ -190,13 +191,18 @@
         }
 
         select { 
+            -webkit-appearance: none;
             width: 100px;
             height: 33px;
             padding: 5px;
-            background: #100e16;
             border: 1px solid #0e0e0e;
+            background: rgba(0,0,0,0.3);
             color: #ffffff;
             font-weight: bold;
+        }
+
+        select:focus { 
+            background: rgba(0,0,0,0.5);
         }
 
         @media only screen and (max-width : 512px) {
