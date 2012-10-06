@@ -47,13 +47,7 @@ var wavepad = (function () {
                 doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
 
                 surface = doc.querySelector('.surface');
-                surface.addEventListener(eventStart, wavepad.play, false);
-
                 finger = doc.querySelector('.finger');
-
-                doc.querySelector('.surface').addEventListener('touchmove', function (e) {
-                    e.preventDefault();
-                });
                 
                 nodes.filter = myAudioContext.createBiquadFilter();  
                 nodes.volume = myAudioContext.createGainNode();
@@ -65,6 +59,12 @@ var wavepad = (function () {
 
                 wavepad.updateOutputs();
                 wavepad.animateSpectrum();
+
+                surface.addEventListener(eventStart, wavepad.play, false);
+
+                doc.querySelector('.surface').addEventListener('touchmove', function (e) {
+                    e.preventDefault();
+                });
             },
 
             routeSounds: function () {
