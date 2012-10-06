@@ -158,8 +158,6 @@ var wavepad = (function () {
                 if (myAudioContext.activeSourceCount > 0) {
                     source.frequency.value = x * multiplier;
                     nodes.filter.frequency.value = 512 - (y * multiplier);
-                } else {
-                    source.disconnect(0);
                 }
 
                 finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + (x - finger.offsetWidth / 2) + 'px,' + (y - finger.offsetHeight / 2) + 'px)';
