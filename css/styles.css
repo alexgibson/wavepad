@@ -226,14 +226,14 @@
             border: 2px solid #d81f38;
             height: 44px;
             color: #ffffff;
-            background: #100e16;
+            background: rgba(0,0,0,0.3);
             -webkit-border-radius: 11px;
             -moz-border-radius: 11px;
             border-radius: 11px;
         }
 
         button:active, button:focus {
-            border: none;
+            background: rgba(0,0,0,0.5);
         }
 
         select { 
