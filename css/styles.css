@@ -64,6 +64,39 @@
             text-align: center;
         }
 
+        .blurred {
+            -webkit-filter: blur(5px);
+            filter: blur(5px);
+        }
+
+        .welcome {
+            position: absolute;
+            left: 50%;
+            top: 150px;
+            width: 256px;
+            height: 258px;
+            margin: 0 0 0 -128px;
+            padding: 1em;
+            text-align: center;
+            background: #0e0e0e;   
+            background: -moz-linear-gradient(top, #7d7e7d, #0e0e0e);
+            background: -webkit-gradient(linear, left top, left bottom, from(#7d7e7d), to(#0e0e0e));
+            background: -webkit-linear-gradient(top, #7d7e7d, #0e0e0e);
+            background: -ms-linear-gradient(top, #7d7e7d, #0e0e0e);
+            background: -o-linear-gradient(top, #7d7e7d, #0e0e0e);
+            background: linear-gradient(top, #7d7e7d, #0e0e0e);
+            -webkit-border-radius: 33px;
+            -moz-border-radius: 33px;
+            border-radius: 33px;
+            z-index: 10;
+        }
+
+        .welcome h2 {
+            font-family: AvenirNextCondensed-Heavy, Helvetica, Arial, Verdana, sans-serif;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+
         .surface {
             position: relative;
             overflow: hidden;
@@ -190,6 +223,21 @@
             background: linear-gradient(top, rgb(253,253,253), rgb(190,190,190));
         }
 
+        button {
+            -webkit-appearance: none;
+            border: 2px solid #d81f38;
+            height: 44px;
+            color: #ffffff;
+            background: #100e16;
+            -webkit-border-radius: 11px;
+            -moz-border-radius: 11px;
+            border-radius: 11px;
+        }
+
+        button:active, button:focus {
+            border: none;
+        }
+
         select { 
             -webkit-appearance: none;
             width: 100px;
@@ -213,6 +261,10 @@
 
             .container {
                 width: 256px; 
+            }
+
+            .welcome {
+                top: 30px;
             }
 
             .title {

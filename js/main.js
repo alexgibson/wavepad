@@ -60,11 +60,19 @@ var wavepad = (function () {
                 wavepad.updateOutputs();
                 wavepad.animateSpectrum();
 
-                surface.addEventListener(eventStart, wavepad.play, false);
+                doc.getElementById('start').addEventListener('click', wavepad.begin, false);
 
                 doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                     e.preventDefault();
                 });
+            },
+
+            begin: function () {
+                var doc = document;
+                doc.getElementById('start').removeEventListener('click', wavepad.begin, false);
+                doc.querySelector('body').removeChild(doc.querySelector('.welcome'));
+                doc.querySelector('.container').classList.remove('blurred');
+                surface.addEventListener(eventStart, wavepad.play, false);
             },
 
             routeSounds: function () {
