@@ -62,6 +62,8 @@
             width: 512px; 
             margin: 0 auto; 
             text-align: center;
+            -webkit-transition: -webkit-filter .1s ease-in-out;
+            transition: filter .1s ease-in-out;
         }
 
         .blurred {
@@ -108,11 +110,6 @@
             -webkit-border-radius: 15px;
             -moz-border-radius: 15px;
             border-radius: 15px;
-            -webkit-transition: background .1s ease-in-out;
-            -moz-transition: background .1s ease-in-out;
-            -ms-transition: background .1s ease-in-out;
-            -o-transition: background .1s ease-in-out;
-            transition: background .1s ease-in-out;
             cursor: pointer;
         }
 
