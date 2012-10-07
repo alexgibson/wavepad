@@ -69,9 +69,11 @@ var wavepad = (function () {
 
             begin: function () {
                 var doc = document;
+
                 doc.getElementById('start').removeEventListener('click', wavepad.begin, false);
                 doc.querySelector('body').removeChild(doc.querySelector('.welcome'));
                 doc.querySelector('.container').classList.remove('blurred');
+
                 surface.addEventListener(eventStart, wavepad.play, false);
             },
 
