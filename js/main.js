@@ -60,7 +60,7 @@ var wavepad = (function () {
                 wavepad.updateOutputs();
                 wavepad.animateSpectrum();
 
-                doc.getElementById('start').addEventListener('click', wavepad.begin, false);
+                doc.getElementById('start').addEventListener(eventEnd, wavepad.begin, false);
 
                 doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                     e.preventDefault();
