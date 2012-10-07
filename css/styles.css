@@ -92,19 +92,6 @@
             -moz-border-radius: 33px;
             border-radius: 33px;
             z-index: 10;
-
-            -webkit-animation-name: fadeIn;
-            -webkit-animation-duration: 0.5s;
-            -webkit-animation-iteration-count: 1;
-            -webkit-animation-timing-function: ease-in;
-            -moz-animation-name: fadeIn;
-            -moz-animation-duration: 0.5s;
-            -moz-animation-iteration-count: 1;
-            -moz-animation-timing-function: ease-in;
-            animation-name: fadeIn;
-            animation-duration: 0.5s;
-            animation-iteration-count: 1;
-            animation-timing-function: ease-in;
         }
 
         .welcome h2 {
@@ -319,30 +306,3 @@
             }
 
         } 
-
-@-webkit-keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@-moz-keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
