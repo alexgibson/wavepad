@@ -65,6 +65,9 @@ var wavepad = (function () {
                 doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                     e.preventDefault();
                 });
+
+                document.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
+                document.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
             },
 
             begin: function () {
@@ -75,6 +78,12 @@ var wavepad = (function () {
                 doc.querySelector('.container').classList.remove('blurred');
 
                 surface.addEventListener(eventStart, wavepad.play, false);
+            },
+
+            handleVisibilityChange: function () {
+                if (document.hidden || document.webkitHidden) {
+                    myAudioAnalyser.disconnect();
+                }
             },
 
             routeSounds: function () {
