@@ -67,11 +67,6 @@
             transition: filter .1s ease-in-out;
         }
 
-        .blurred {
-            -webkit-filter: blur(5px);
-            filter: blur(5px);
-        }
-
         .welcome {
             position: absolute;
             left: 50%;
@@ -139,12 +134,13 @@
         }
 
         .finger {
+            display: none;
             position: absolute;
             width: 66px;
             height: 66px;
-            background: transparent;
-            top: 0;
-            left: 0;
+            background: #d81f38;
+            top: -33px;
+            left: -33px;
             -webkit-border-radius: 33px;
             -moz-border-radius: 33px;
             border-radius: 33px;
@@ -153,14 +149,13 @@
             -ms-transition: background .1s ease-in-out;
             -o-transition: background .1s ease-in-out;
             transition: background .1s ease-in-out;
-            -webkit-filter: blur(15px);
-            filter: blur(15px);
             cursor: pointer;
         }
 
-        .finger.active {
-            background: #d81f38;
-
+        .active {
+            display: block;
+            -webkit-filter: blur(15px);
+            filter: blur(15px);
         }
 
         canvas { 
