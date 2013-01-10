@@ -91,8 +91,8 @@ var wavepad = (function () {
 
                 source = myAudioContext.createOscillator();
 
-                source.type = doc.getElementById('waveform').value;     
-                nodes.filter.type = doc.getElementById('filter-type').value;
+                source.type = parseInt(doc.getElementById('waveform').value, 10);     
+                nodes.filter.type = parseInt(doc.getElementById('filter-type').value, 10);
                 nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
                 nodes.delay.delayTime.value = doc.getElementById('delay').value;
                 nodes.volume.gain.value = 0.2;
