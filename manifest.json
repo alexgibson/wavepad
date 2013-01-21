@@ -1,0 +1,14 @@
+{
+  "name": "Wave-PD1",
+  "description": "An experimental synthesizer built using the Web Audio API.",
+  "manifest_version": 2,
+  "version": "1",
+  "app": {
+    "launch": {
+      "web_url": "http://alxgbsn.co.uk/wavepad"
+    }
+  },
+  "icons": {
+    "128": "chrome-128.png"
+  }
+}
