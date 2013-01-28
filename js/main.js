@@ -22,10 +22,12 @@ var wavepad = (function () {
             init: function () {
                 var doc = document;
 
-                if ('webkitAudioContext' in window || 'AudioContext' in window) {
-                    myAudioContext = new webkitAudioContext() || AudioContext();
+                if ('webkitAudioContext' in window) {
+                    myAudioContext = new webkitAudioContext();
+                } else if ('AudioContext' in window) {
+                    myAudioContext = new AudioContext();
                 } else {
-                    alert('Your browser does not support Web Audio API');
+                    alert('Your browser does not yet support the Web Audio API');
                     return;
                 }
 
