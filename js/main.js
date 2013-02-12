@@ -177,7 +177,7 @@ var wavepad = (function () {
             updateOutputs: function (e) {
                 var doc = document;
                 doc.getElementById('delay-output').value = Math.round(doc.getElementById('delay').value * 1000) + ' ms';
-                doc.getElementById('feedback-output').value = doc.getElementById('feedback').value;
+                doc.getElementById('feedback-output').value = Math.round(doc.getElementById('feedback').value * 10);
             },
 
             sliderChange: function (slider) {
