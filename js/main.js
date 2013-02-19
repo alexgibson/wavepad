@@ -11,11 +11,7 @@ var wavepad = (function () {
 		myAudioContext,
 		myAudioAnalyser,
 		mySpectrum,
-		impulseResponse,
-		hasTouch = 'ontouchstart' in window || 'createTouch' in document,
-		eventStart = hasTouch ? 'touchstart' : 'mousedown',
-		eventMove = hasTouch ? 'touchmove' : 'mousemove',
-		eventEnd = hasTouch ? 'touchend' : 'mouseup',
+		hasTouch = false,
 		isSmallViewport = false,
 		isMuted = false;
 
@@ -64,7 +60,8 @@ var wavepad = (function () {
 			wavepad.updateOutputs();
 			wavepad.animateSpectrum();
 
-			surface.addEventListener(eventStart, wavepad.play, false);
+			surface.addEventListener('mousedown', wavepad.play, false);
+			surface.addEventListener('touchstart', wavepad.play, false);
 
 			doc.querySelector('.surface').addEventListener('touchmove', function (e) {
 				e.preventDefault();
@@ -102,9 +99,19 @@ var wavepad = (function () {
 		},
 
 		play: function (e) {
-			var x = e.pageX - surface.offsetLeft,
-				y = e.pageY - surface.offsetTop,
+			var x,
+				y,
 				multiplier = isSmallViewport ? 2 : 1;
+
+			if (e.type === 'touchstart') {
+				wavepad.hasTouch = true;
+			} else if (e.type === 'mousedown' && wavepad.hasTouch) {
+				surface.addEventListener('mouseup', wavepad.stop, false);
+				return;
+			}
+
+			x = e.pageX - surface.offsetLeft;
+			y = e.pageY - surface.offsetTop;
 
 			if (myAudioContext.activeSourceCount > 0) {
 				wavepad.kill();
@@ -118,18 +125,22 @@ var wavepad = (function () {
 			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + x + 'px,' + y  + 'px)';
 			finger.classList.add('active');
 
-			surface.addEventListener(eventMove, wavepad.effect, false);
-			surface.addEventListener(eventEnd, wavepad.stop, false);
-
-			if (hasTouch) {
-				surface.addEventListener('touchcancel', wavepad.kill, false);
-			}
+			surface.addEventListener('touchmove', wavepad.effect, false);
+			surface.addEventListener('touchend', wavepad.stop, false);
+			surface.addEventListener('touchcancel', wavepad.kill, false);
+			surface.addEventListener('mousemove', wavepad.effect, false);
+			surface.addEventListener('mouseup', wavepad.stop, false);
 		},
 
 		stop: function (e) {
 			var x = e.pageX - surface.offsetLeft,
 				y = e.pageY - surface.offsetTop,
 				multiplier = isSmallViewport ? 2 : 1;
+
+			if (e.type === 'mouseup' && wavepad.hasTouch) {
+				wavepad.hasTouch = false;
+				return;
+			}
 
 			if (myAudioContext.activeSourceCount > 0) {
 				source.frequency.value = x * multiplier;
@@ -139,12 +150,11 @@ var wavepad = (function () {
 
 			finger.classList.remove('active');
 
-			surface.removeEventListener(eventMove, wavepad.effect, false);
-			surface.removeEventListener(eventEnd, wavepad.stop, false);
-
-			if (hasTouch) {
-				surface.removeEventListener('touchcancel', wavepad.kill, false);
-			}
+			surface.removeEventListener('mousemove', wavepad.effect, false);
+			surface.removeEventListener('mouseup', wavepad.stop, false);
+			surface.removeEventListener('touchmove', wavepad.effect, false);
+			surface.removeEventListener('touchend', wavepad.stop, false);
+			surface.removeEventListener('touchcancel', wavepad.kill, false);
 		},
 
 		kill: function () {
@@ -155,12 +165,13 @@ var wavepad = (function () {
 
 			finger.classList.remove('active');
 
-			surface.removeEventListener(eventMove, wavepad.effect, false);
-			surface.removeEventListener(eventEnd, wavepad.stop, false);
+			surface.removeEventListener('mousemove', wavepad.effect, false);
+			surface.removeEventListener('mouseup', wavepad.stop, false);
+			surface.removeEventListener('touchmove', wavepad.effect, false);
+			surface.removeEventListener('touchend', wavepad.stop, false);
+			surface.removeEventListener('touchcancel', wavepad.kill, false);
 
-			if (hasTouch) {
-				surface.removeEventListener('touchcancel', wavepad.kill, false);
-			}
+			wavepad.hasTouch = false;
 		},
 
 		effect: function (e) {
