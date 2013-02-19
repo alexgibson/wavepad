@@ -20,10 +20,10 @@ var wavepad = (function () {
 		init: function () {
 			var doc = document;
 
-			if ('webkitAudioContext' in window) {
-				myAudioContext = new webkitAudioContext();
-			} else if ('AudioContext' in window) {
+			if ('AudioContext' in window) {
 				myAudioContext = new AudioContext();
+			} else if ('webkitAudioContext' in window) {
+				myAudioContext = new webkitAudioContext();
 			} else {
 				alert('Your browser does not yet support the Web Audio API');
 				return;
