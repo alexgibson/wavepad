@@ -115,7 +115,7 @@ var wavepad = (function () {
 			nodes.filter.frequency.value = 512 - (y * multiplier);
 			source.noteOn(0);
 
-			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + x + 'px,' + y  + 'px)';
+			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
 			finger.classList.add('active');
 
 			surface.addEventListener(eventMove, wavepad.effect, false);
@@ -173,7 +173,7 @@ var wavepad = (function () {
 				nodes.filter.frequency.value = 512 - (y * multiplier);
 			}
 
-			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
 		},
 
 		updateOutputs: function (e) {
