@@ -70,11 +70,13 @@ var wavepad = (function () {
 			doc.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
 			doc.addEventListener('mozvisibilitychange', wavepad.handleVisibilityChange, false);
 			doc.addEventListener('msvisibilitychange', wavepad.handleVisibilityChange, false);
+			doc.addEventListener('ovisibilitychange', wavepad.handleVisibilityChange, false);
 			doc.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
 		},
 
 		handleVisibilityChange: function () {
-			if (document.hidden || document.webkitHidden) {
+			var doc = document;
+			if (doc.hidden || doc.webkitHidden || doc.mozHidden || doc.msHidden || doc.oHidden) {
 				myAudioAnalyser.disconnect();
 			}
 		},
