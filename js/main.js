@@ -67,8 +67,10 @@ var wavepad = (function () {
 				e.preventDefault();
 			});
 
-			document.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
-			document.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
+			doc.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
+			doc.addEventListener('mozvisibilitychange', wavepad.handleVisibilityChange, false);
+			doc.addEventListener('msvisibilitychange', wavepad.handleVisibilityChange, false);
+			doc.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
 		},
 
 		handleVisibilityChange: function () {
@@ -122,7 +124,7 @@ var wavepad = (function () {
 			nodes.filter.frequency.value = 512 - (y * multiplier);
 			source.noteOn(0);
 
-			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + x + 'px,' + y  + 'px)';
+			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
 			finger.classList.add('active');
 
 			surface.addEventListener('touchmove', wavepad.effect, false);
@@ -184,7 +186,7 @@ var wavepad = (function () {
 				nodes.filter.frequency.value = 512 - (y * multiplier);
 			}
 
-			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
 		},
 
 		updateOutputs: function (e) {
