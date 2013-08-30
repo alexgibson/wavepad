@@ -2,260 +2,288 @@
 
 var wavepad = (function () {
 
-	'use strict';
+    'use strict';
 
-	var surface,
-		finger,
-		source,
-		nodes = {},
-		myAudioContext,
-		myAudioAnalyser,
-		mySpectrum,
-		hasTouch = false,
-		isSmallViewport = false,
-		isMuted = false;
+    var surface,
+        finger,
+        source,
+        nodes = {},
+        myAudioContext,
+        myAudioAnalyser,
+        mySpectrum,
+        hasTouch = false,
+        isSmallViewport = false,
+        isMuted = false,
+        isPlaying = false,
+        isSafari = navigator.userAgent.indexOf("Safari") !== -1,
+        standard = 'AudioContext' in window,
+        webkit = 'webkitAudioContext' in window;
 
-	return {
+    return {
 
-		init: function () {
-			var doc = document;
+        init: function () {
+            var doc = document;
 
-			if ('AudioContext' in window) {
-				myAudioContext = new AudioContext();
-			} else if ('webkitAudioContext' in window) {
-				myAudioContext = new webkitAudioContext();
-			} else {
-				alert('Your browser does not yet support the Web Audio API');
-				return;
-			}
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-			if (window.matchMedia) {
-				isSmallViewport = window.matchMedia("(max-width: 512px)").matches ? true : false;
+            if ('AudioContext' in window) {
+                myAudioContext = new AudioContext();
+            } else {
+                alert('Your browser does not yet support the Web Audio API');
+                return;
+            }
 
-				window.matchMedia("(max-width: 512px)").addListener(function (mql) {
-					if (mql.matches) {
-						isSmallViewport = true;
-					} else {
-						isSmallViewport = false;
-					}
-				});
-			}
+            if (window.matchMedia) {
+                isSmallViewport = window.matchMedia("(max-width: 512px)").matches ? true : false;
 
-			doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
-			doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
-			doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
-			doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
+                window.matchMedia("(max-width: 512px)").addListener(function (mql) {
+                    if (mql.matches) {
+                        isSmallViewport = true;
+                    } else {
+                        isSmallViewport = false;
+                    }
+                });
+            }
 
-			surface = doc.querySelector('.surface');
-			finger = doc.querySelector('.finger');
+            doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
+            doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
+            doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
+            doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
 
-			nodes.filter = myAudioContext.createBiquadFilter();
-			nodes.volume = myAudioContext.createGainNode();
-			nodes.delay = myAudioContext.createDelayNode();
-			nodes.feedbackGain = myAudioContext.createGainNode();
+            surface = doc.querySelector('.surface');
+            finger = doc.querySelector('.finger');
 
-			myAudioAnalyser = myAudioContext.createAnalyser();
-			myAudioAnalyser.smoothingTimeConstant = 0.85;
+            nodes.filter = myAudioContext.createBiquadFilter();
+            nodes.volume = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
+            nodes.delay = myAudioContext.createDelay ? myAudioContext.createDelay() : myAudioContext.createDelayNode();
+            nodes.feedbackGain = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
 
-			wavepad.updateOutputs();
-			wavepad.animateSpectrum();
+            myAudioAnalyser = myAudioContext.createAnalyser();
+            myAudioAnalyser.smoothingTimeConstant = 0.85;
 
-			surface.addEventListener('mousedown', wavepad.play, false);
-			surface.addEventListener('touchstart', wavepad.play, false);
+            wavepad.updateOutputs();
+            wavepad.animateSpectrum();
 
-			doc.querySelector('.surface').addEventListener('touchmove', function (e) {
-				e.preventDefault();
-			});
+            surface.addEventListener('mousedown', wavepad.play, false);
+            surface.addEventListener('touchstart', wavepad.play, false);
 
-			doc.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
-			doc.addEventListener('mozvisibilitychange', wavepad.handleVisibilityChange, false);
-			doc.addEventListener('msvisibilitychange', wavepad.handleVisibilityChange, false);
-			doc.addEventListener('ovisibilitychange', wavepad.handleVisibilityChange, false);
-			doc.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
-		},
+            doc.querySelector('.surface').addEventListener('touchmove', function (e) {
+                e.preventDefault();
+            });
 
-		handleVisibilityChange: function () {
-			var doc = document;
-			if (doc.hidden || doc.webkitHidden || doc.mozHidden || doc.msHidden || doc.oHidden) {
-				myAudioAnalyser.disconnect();
-			}
-		},
+            doc.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
+            doc.addEventListener('mozvisibilitychange', wavepad.handleVisibilityChange, false);
+            doc.addEventListener('msvisibilitychange', wavepad.handleVisibilityChange, false);
+            doc.addEventListener('ovisibilitychange', wavepad.handleVisibilityChange, false);
+            doc.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
+        },
 
-		routeSounds: function () {
-			var doc = document;
+        handleVisibilityChange: function () {
+            var doc = document;
+            if (doc.hidden || doc.webkitHidden || doc.mozHidden || doc.msHidden || doc.oHidden) {
+                myAudioAnalyser.disconnect();
+            }
+        },
 
-			source = myAudioContext.createOscillator();
+        routeSounds: function () {
+            var doc = document;
 
-			source.type = parseInt(doc.getElementById('waveform').value, 10);
-			nodes.filter.type = parseInt(doc.getElementById('filter-type').value, 10);
-			nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
-			nodes.delay.delayTime.value = doc.getElementById('delay').value;
-			nodes.volume.gain.value = 0.2;
+            source = myAudioContext.createOscillator();
 
-			source.connect(nodes.filter);
-			nodes.filter.connect(nodes.volume);
-			nodes.filter.connect(nodes.delay);
-			nodes.delay.connect(nodes.feedbackGain);
-			nodes.feedbackGain.connect(nodes.volume);
-			nodes.feedbackGain.connect(nodes.delay);
-			nodes.volume.connect(myAudioAnalyser);
-			myAudioAnalyser.connect(myAudioContext.destination);
-		},
+            this.setWaveform(parseInt(doc.getElementById('waveform').value, 10));
+            nodes.filter.type = parseInt(doc.getElementById('filter-type').value, 10);
+            nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
+            nodes.delay.delayTime.value = doc.getElementById('delay').value;
+            nodes.volume.gain.value = 0.2;
 
-		play: function (e) {
-			var x,
-				y,
-				multiplier = isSmallViewport ? 2 : 1;
+            source.connect(nodes.filter);
+            nodes.filter.connect(nodes.volume);
+            nodes.filter.connect(nodes.delay);
+            nodes.delay.connect(nodes.feedbackGain);
+            nodes.feedbackGain.connect(nodes.volume);
+            nodes.feedbackGain.connect(nodes.delay);
+            nodes.volume.connect(myAudioAnalyser);
+            myAudioAnalyser.connect(myAudioContext.destination);
+        },
 
-			if (e.type === 'touchstart') {
-				wavepad.hasTouch = true;
-			} else if (e.type === 'mousedown' && wavepad.hasTouch) {
-				surface.addEventListener('mouseup', wavepad.stop, false);
-				return;
-			}
+        play: function (e) {
+            var x,
+                y,
+                multiplier = isSmallViewport ? 2 : 1;
 
-			x = e.pageX - surface.offsetLeft;
-			y = e.pageY - surface.offsetTop;
+            if (e.type === 'touchstart') {
+                wavepad.hasTouch = true;
+            } else if (e.type === 'mousedown' && wavepad.hasTouch) {
+                surface.addEventListener('mouseup', wavepad.stop, false);
+                return;
+            }
 
-			if (myAudioContext.activeSourceCount > 0) {
-				wavepad.kill();
-			}
+            x = e.pageX - surface.offsetLeft;
+            y = e.pageY - surface.offsetTop;
 
-			wavepad.routeSounds();
-			source.frequency.value = x * multiplier;
-			nodes.filter.frequency.value = 512 - (y * multiplier);
-			source.noteOn(0);
+            if (isPlaying) {
+                wavepad.kill();
+            }
 
-			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
-			finger.classList.add('active');
+            wavepad.routeSounds();
+            source.frequency.value = x * multiplier;
+            nodes.filter.frequency.value = 512 - (y * multiplier);
 
-			surface.addEventListener('touchmove', wavepad.effect, false);
-			surface.addEventListener('touchend', wavepad.stop, false);
-			surface.addEventListener('touchcancel', wavepad.kill, false);
-			surface.addEventListener('mousemove', wavepad.effect, false);
-			surface.addEventListener('mouseup', wavepad.stop, false);
-		},
+            if (standard) {
+                source.start(0);
+            } else {
+                source.noteOn(0);
+            }
 
-		stop: function (e) {
-			var x = e.pageX - surface.offsetLeft,
-				y = e.pageY - surface.offsetTop,
-				multiplier = isSmallViewport ? 2 : 1;
+            isPlaying = true;
 
-			if (e.type === 'mouseup' && wavepad.hasTouch) {
-				wavepad.hasTouch = false;
-				return;
-			}
+            finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
+            finger.classList.add('active');
 
-			if (myAudioContext.activeSourceCount > 0) {
-				source.frequency.value = x * multiplier;
-				nodes.filter.frequency.value = 512 - (y * multiplier);
-				source.noteOff(0);
-			}
+            surface.addEventListener('touchmove', wavepad.effect, false);
+            surface.addEventListener('touchend', wavepad.stop, false);
+            surface.addEventListener('touchcancel', wavepad.kill, false);
+            surface.addEventListener('mousemove', wavepad.effect, false);
+            surface.addEventListener('mouseup', wavepad.stop, false);
+        },
 
-			finger.classList.remove('active');
+        stop: function (e) {
+            var x = e.pageX - surface.offsetLeft,
+                y = e.pageY - surface.offsetTop,
+                multiplier = isSmallViewport ? 2 : 1;
 
-			surface.removeEventListener('mousemove', wavepad.effect, false);
-			surface.removeEventListener('mouseup', wavepad.stop, false);
-			surface.removeEventListener('touchmove', wavepad.effect, false);
-			surface.removeEventListener('touchend', wavepad.stop, false);
-			surface.removeEventListener('touchcancel', wavepad.kill, false);
-		},
+            if (e.type === 'mouseup' && wavepad.hasTouch) {
+                wavepad.hasTouch = false;
+                return;
+            }
 
-		kill: function () {
+            if (isPlaying) {
+                source.frequency.value = x * multiplier;
+                nodes.filter.frequency.value = 512 - (y * multiplier);
+                if (standard) {
+                    source.stop(0);
+                } else {
+                    source.noteOff(0);
+                }
+                isPlaying = false;
+            }
 
-			if (myAudioContext.activeSourceCount > 0) {
-				source.noteOff(0);
-			}
+            finger.classList.remove('active');
 
-			finger.classList.remove('active');
+            surface.removeEventListener('mousemove', wavepad.effect, false);
+            surface.removeEventListener('mouseup', wavepad.stop, false);
+            surface.removeEventListener('touchmove', wavepad.effect, false);
+            surface.removeEventListener('touchend', wavepad.stop, false);
+            surface.removeEventListener('touchcancel', wavepad.kill, false);
+        },
 
-			surface.removeEventListener('mousemove', wavepad.effect, false);
-			surface.removeEventListener('mouseup', wavepad.stop, false);
-			surface.removeEventListener('touchmove', wavepad.effect, false);
-			surface.removeEventListener('touchend', wavepad.stop, false);
-			surface.removeEventListener('touchcancel', wavepad.kill, false);
+        kill: function () {
 
-			wavepad.hasTouch = false;
-		},
+            if (isPlaying) {
+                if (standard) {
+                    source.stop(0);
+                } else {
+                    source.noteOff(0);
+                }
+                isPlaying = false;
+            }
 
-		effect: function (e) {
-			var x = e.pageX - surface.offsetLeft,
-				y = e.pageY - surface.offsetTop,
-				multiplier = isSmallViewport ? 2 : 1;
+            finger.classList.remove('active');
 
-			if (myAudioContext.activeSourceCount > 0) {
-				source.frequency.value = x * multiplier;
-				nodes.filter.frequency.value = 512 - (y * multiplier);
-			}
+            surface.removeEventListener('mousemove', wavepad.effect, false);
+            surface.removeEventListener('mouseup', wavepad.stop, false);
+            surface.removeEventListener('touchmove', wavepad.effect, false);
+            surface.removeEventListener('touchend', wavepad.stop, false);
+            surface.removeEventListener('touchcancel', wavepad.kill, false);
 
-			finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
-		},
+            wavepad.hasTouch = false;
+        },
 
-		updateOutputs: function (e) {
-			var doc = document;
-			doc.getElementById('delay-output').value = Math.round(doc.getElementById('delay').value * 1000) + ' ms';
-			doc.getElementById('feedback-output').value = Math.round(doc.getElementById('feedback').value * 10);
-		},
+        effect: function (e) {
+            var x = e.pageX - surface.offsetLeft,
+                y = e.pageY - surface.offsetTop,
+                multiplier = isSmallViewport ? 2 : 1;
 
-		sliderChange: function (slider) {
-			if (myAudioContext.activeSourceCount > 0) {
-				if (slider.id === 'waveform') {
-					wavepad.stop();
-					wavepad.play();
-				} else if (slider.id === 'frequency') {
-					source.frequency.value = slider.value;
-				} else if (slider.id === 'delay') {
-					nodes.delay.delayTime.value = slider.value;
-				} else if (slider.id === 'feedback') {
-					nodes.feedbackGain.gain.value = slider.value;
-				}
-			}
-			wavepad.updateOutputs();
-		},
+            if (isPlaying) {
+                source.frequency.value = x * multiplier;
+                nodes.filter.frequency.value = 512 - (y * multiplier);
+            }
 
-		filterChange: function (slider) {
-			if (myAudioContext.activeSourceCount > 0) {
-				if (slider.id === 'filter-type') {
-					nodes.filter.type = slider.value;
-				}
-			}
-		},
+            finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
+        },
 
-		animateSpectrum: function () {
-			mySpectrum = requestAnimationFrame(wavepad.animateSpectrum, document.querySelector('canvas'));
-			wavepad.drawSpectrum();
-		},
+        updateOutputs: function (e) {
+            var doc = document;
+            doc.getElementById('delay-output').value = Math.round(doc.getElementById('delay').value * 1000) + ' ms';
+            doc.getElementById('feedback-output').value = Math.round(doc.getElementById('feedback').value * 10);
+        },
 
-		drawSpectrum: function () {
-			var canvas = document.querySelector('canvas'),
-				ctx = canvas.getContext('2d'),
-				canvasSize = isSmallViewport ? 256 : 512,
-				multiplier = isSmallViewport ? 1 : 2,
-				width = canvasSize,
-				height = canvasSize,
-				bar_width = isSmallViewport ? 10 : 20,
-				freqByteData,
-				barCount,
-				magnitude,
-				i;
+        setWaveform: function (value) {
+            var waves = isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"];
+            source.type = waves[value];
+        },
 
-			canvas.width = canvasSize - 10;
-			canvas.height = canvasSize - 10;
+        sliderChange: function (slider) {
 
-			ctx.clearRect(0, 0, width, height);
-			ctx.fillStyle = '#1d1c25';
+            if (isPlaying) {
+                if (slider.id === 'waveform') {
+                    wavepad.stop();
+                    wavepad.play();
+                } else if (slider.id === 'frequency') {
+                    source.frequency.value = slider.value;
+                } else if (slider.id === 'delay') {
+                    nodes.delay.delayTime.value = slider.value;
+                } else if (slider.id === 'feedback') {
+                    nodes.feedbackGain.gain.value = slider.value;
+                }
+            }
+            wavepad.updateOutputs();
+        },
 
-			freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
-			myAudioAnalyser.getByteFrequencyData(freqByteData);
-			barCount = Math.round(width / bar_width);
+        filterChange: function (slider) {
+            var filters = isSafari ? [0,1,2,3,4,5,6,7] : ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
+            if (isPlaying) {
+                if (slider.id === 'filter-type') {
+                    nodes.filter.type = filters[slider.value];
+                }
+            }
+        },
 
-			for (i = 0; i < barCount; i += 1) {
-				magnitude = freqByteData[i];
-				// some values need adjusting to fit on the canvas
-				ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * multiplier);
-			}
-		}
-	};
+        animateSpectrum: function () {
+            mySpectrum = requestAnimationFrame(wavepad.animateSpectrum, document.querySelector('canvas'));
+            wavepad.drawSpectrum();
+        },
+
+        drawSpectrum: function () {
+            var canvas = document.querySelector('canvas'),
+                ctx = canvas.getContext('2d'),
+                canvasSize = isSmallViewport ? 256 : 512,
+                multiplier = isSmallViewport ? 1 : 2,
+                width = canvasSize,
+                height = canvasSize,
+                bar_width = isSmallViewport ? 10 : 20,
+                freqByteData,
+                barCount,
+                magnitude,
+                i;
+
+            canvas.width = canvasSize - 10;
+            canvas.height = canvasSize - 10;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#1d1c25';
+
+            freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
+            myAudioAnalyser.getByteFrequencyData(freqByteData);
+            barCount = Math.round(width / bar_width);
+
+            for (i = 0; i < barCount; i += 1) {
+                magnitude = freqByteData[i];
+                // some values need adjusting to fit on the canvas
+                ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * multiplier);
+            }
+        }
+    };
 }());
 
 window.addEventListener("DOMContentLoaded", wavepad.init, true);
