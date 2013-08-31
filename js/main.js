@@ -134,7 +134,7 @@ var wavepad = (function () {
             source.start(0);
 
             source.frequency.value = x * multiplier;
-            wavepad.setFilterFrequency(y * multiplier);
+            wavepad.setFilterFrequency(y);
 
             isPlaying = true;
 
@@ -160,7 +160,7 @@ var wavepad = (function () {
 
             if (isPlaying) {
                 source.frequency.value = x * multiplier;
-                wavepad.setFilterFrequency(y * multiplier);
+                wavepad.setFilterFrequency(y);
                 if (!source.stop) {
                     source.stop = source.noteOff;
                 }
@@ -205,7 +205,7 @@ var wavepad = (function () {
 
             if (isPlaying) {
                 source.frequency.value = x * multiplier;
-                wavepad.setFilterFrequency(y * multiplier);
+                wavepad.setFilterFrequency(y);
             }
 
             finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
