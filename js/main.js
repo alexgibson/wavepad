@@ -15,9 +15,7 @@ var wavepad = (function () {
         isSmallViewport = false,
         isMuted = false,
         isPlaying = false,
-        isSafari = navigator.userAgent.indexOf("Safari") !== -1,
-        standard = 'AudioContext' in window,
-        webkit = 'webkitAudioContext' in window;
+        isSafari = navigator.userAgent.indexOf("Safari") !== -1;
 
     return {
 
@@ -45,7 +43,7 @@ var wavepad = (function () {
                 });
             }
 
-            doc.getElementById('waveform').addEventListener('change', wavepad.sliderChange, false);
+            doc.getElementById('waveform').addEventListener('change', wavepad.setWaveform, false);
             doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
             doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
             doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
@@ -57,6 +55,7 @@ var wavepad = (function () {
             nodes.volume = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
             nodes.delay = myAudioContext.createDelay ? myAudioContext.createDelay() : myAudioContext.createDelayNode();
             nodes.feedbackGain = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
+            nodes.compressor = myAudioContext.createDynamicsCompressor();
 
             myAudioAnalyser = myAudioContext.createAnalyser();
             myAudioAnalyser.smoothingTimeConstant = 0.85;
@@ -90,18 +89,19 @@ var wavepad = (function () {
 
             source = myAudioContext.createOscillator();
 
-            this.setWaveform(parseInt(doc.getElementById('waveform').value, 10));
-            nodes.filter.type = parseInt(doc.getElementById('filter-type').value, 10);
+            wavepad.setWaveform(doc.getElementById('waveform'));
+            wavepad.filterChange(doc.getElementById('filter-type'));
             nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
             nodes.delay.delayTime.value = doc.getElementById('delay').value;
             nodes.volume.gain.value = 0.2;
 
             source.connect(nodes.filter);
-            nodes.filter.connect(nodes.volume);
+            nodes.filter.connect(nodes.compressor);
             nodes.filter.connect(nodes.delay);
             nodes.delay.connect(nodes.feedbackGain);
-            nodes.feedbackGain.connect(nodes.volume);
+            nodes.delay.connect(nodes.compressor);
             nodes.feedbackGain.connect(nodes.delay);
+            nodes.compressor.connect(nodes.volume);
             nodes.volume.connect(myAudioAnalyser);
             myAudioAnalyser.connect(myAudioContext.destination);
         },
@@ -126,14 +126,15 @@ var wavepad = (function () {
             }
 
             wavepad.routeSounds();
-            source.frequency.value = x * multiplier;
-            nodes.filter.frequency.value = 512 - (y * multiplier);
 
-            if (standard) {
-                source.start(0);
-            } else {
-                source.noteOn(0);
+            if (!source.start) {
+                source.start = source.noteOn;
             }
+
+            source.start(0);
+
+            source.frequency.value = x * multiplier;
+            wavepad.setFilterFrequency(y * multiplier);
 
             isPlaying = true;
 
@@ -159,12 +160,11 @@ var wavepad = (function () {
 
             if (isPlaying) {
                 source.frequency.value = x * multiplier;
-                nodes.filter.frequency.value = 512 - (y * multiplier);
-                if (standard) {
-                    source.stop(0);
-                } else {
-                    source.noteOff(0);
+                wavepad.setFilterFrequency(y * multiplier);
+                if (!source.stop) {
+                    source.stop = source.noteOff;
                 }
+                source.stop(0);
                 isPlaying = false;
             }
 
@@ -180,11 +180,10 @@ var wavepad = (function () {
         kill: function () {
 
             if (isPlaying) {
-                if (standard) {
-                    source.stop(0);
-                } else {
-                    source.noteOff(0);
+                if (!source.stop) {
+                    source.stop = source.noteOff;
                 }
+                source.stop(0);
                 isPlaying = false;
             }
 
@@ -206,7 +205,7 @@ var wavepad = (function () {
 
             if (isPlaying) {
                 source.frequency.value = x * multiplier;
-                nodes.filter.frequency.value = 512 - (y * multiplier);
+                wavepad.setFilterFrequency(y * multiplier);
             }
 
             finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
@@ -218,7 +217,8 @@ var wavepad = (function () {
             doc.getElementById('feedback-output').value = Math.round(doc.getElementById('feedback').value * 10);
         },
 
-        setWaveform: function (value) {
+        setWaveform: function (option) {
+            var value = option.value || this.value;
             var waves = isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"];
             source.type = waves[value];
         },
@@ -240,12 +240,20 @@ var wavepad = (function () {
             wavepad.updateOutputs();
         },
 
-        filterChange: function (slider) {
+        setFilterFrequency: function (y) {
+            var min = 40; // min 40Hz
+            var max = myAudioContext.sampleRate / 2; // max half of the sampling rate
+            var numberOfOctaves = Math.log(max / min) / Math.LN2; // Logarithm (base 2) to compute how many octaves fall in the range.
+            var multiplier = Math.pow(2, numberOfOctaves * (((2 / surface.clientHeight) * (surface.clientHeight - y)) - 1.0)); // Compute a multiplier from 0 to 1 based on an exponential scale.
+            nodes.filter.frequency.value = max * multiplier; // Get back to the frequency value between min and max.
+        },
+
+        filterChange: function (option) {
+            var value = option.value || this.value;
+            var id = option.id || this.id;
             var filters = isSafari ? [0,1,2,3,4,5,6,7] : ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
-            if (isPlaying) {
-                if (slider.id === 'filter-type') {
-                    nodes.filter.type = filters[slider.value];
-                }
+            if (id === 'filter-type') {
+                nodes.filter.type = filters[value];
             }
         },
 
