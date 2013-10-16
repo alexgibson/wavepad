@@ -132,9 +132,8 @@ var wavepad = (function () {
             }
 
             if (e.type === 'touchstart') {
-                wavepad.hasTouch = true;
-            } else if (e.type === 'mousedown' && wavepad.hasTouch) {
-                surface.addEventListener('mouseup', wavepad.stop, false);
+                hasTouch = true;
+            } else if (e.type === 'mousedown' && hasTouch) {
                 return;
             }
 
@@ -161,8 +160,8 @@ var wavepad = (function () {
                 y = e.pageY - surface.offsetTop,
                 multiplier = isSmallViewport ? 2 : 1;
 
-            if (e.type === 'mouseup' && wavepad.hasTouch) {
-                wavepad.hasTouch = false;
+            if (e.type === 'mouseup' && hasTouch) {
+                hasTouch = false;
                 return;
             }
 
@@ -185,6 +184,10 @@ var wavepad = (function () {
             var x = e.pageX - surface.offsetLeft,
                 y = e.pageY - surface.offsetTop,
                 multiplier = isSmallViewport ? 2 : 1;
+
+            if (e.type === 'mousemove' && hasTouch) {
+                return;
+            }
 
             if (isPlaying) {
                 source.frequency.value = x * multiplier;
