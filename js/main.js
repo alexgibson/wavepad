@@ -43,6 +43,7 @@ var wavepad = (function () {
                 });
             }
 
+            doc.getElementById('power').addEventListener('click', wavepad.togglePower, false);
             doc.getElementById('waveform').addEventListener('change', wavepad.setWaveform, false);
             doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange, false);
             doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
@@ -51,6 +52,7 @@ var wavepad = (function () {
             surface = doc.querySelector('.surface');
             finger = doc.querySelector('.finger');
 
+            nodes.oscVolume = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
             nodes.filter = myAudioContext.createBiquadFilter();
             nodes.volume = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
             nodes.delay = myAudioContext.createDelay ? myAudioContext.createDelay() : myAudioContext.createDelayNode();
@@ -69,19 +71,6 @@ var wavepad = (function () {
             doc.querySelector('.surface').addEventListener('touchmove', function (e) {
                 e.preventDefault();
             });
-
-            doc.addEventListener('webkitvisibilitychange', wavepad.handleVisibilityChange, false);
-            doc.addEventListener('mozvisibilitychange', wavepad.handleVisibilityChange, false);
-            doc.addEventListener('msvisibilitychange', wavepad.handleVisibilityChange, false);
-            doc.addEventListener('ovisibilitychange', wavepad.handleVisibilityChange, false);
-            doc.addEventListener('visibilitychange', wavepad.handleVisibilityChange, false);
-        },
-
-        handleVisibilityChange: function () {
-            var doc = document;
-            if (doc.hidden || doc.webkitHidden || doc.mozHidden || doc.msHidden || doc.oHidden) {
-                myAudioAnalyser.disconnect();
-            }
         },
 
         routeSounds: function () {
@@ -94,8 +83,10 @@ var wavepad = (function () {
             nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
             nodes.delay.delayTime.value = doc.getElementById('delay').value;
             nodes.volume.gain.value = 0.2;
+            nodes.oscVolume.gain.value = 0;
 
-            source.connect(nodes.filter);
+            source.connect(nodes.oscVolume);
+            nodes.oscVolume.connect(nodes.filter);
             nodes.filter.connect(nodes.compressor);
             nodes.filter.connect(nodes.delay);
             nodes.delay.connect(nodes.feedbackGain);
@@ -104,12 +95,41 @@ var wavepad = (function () {
             nodes.compressor.connect(nodes.volume);
             nodes.volume.connect(myAudioAnalyser);
             myAudioAnalyser.connect(myAudioContext.destination);
+
+            if (!source.start) {
+                source.start = source.noteOn;
+            }
+
+            source.start(0);
+        },
+
+        togglePower: function () {
+
+            var doc = document;
+
+            if (isPlaying) {
+                if (!source.stop) {
+                    source.stop = source.noteOff;
+                }
+                source.stop(0);
+                myAudioAnalyser.disconnect();
+                doc.getElementById('power').classList.add('off');
+                isPlaying = false;
+            } else {
+                wavepad.routeSounds();
+                doc.getElementById('power').classList.remove('off');
+                isPlaying = true;
+            }
         },
 
         play: function (e) {
             var x,
                 y,
                 multiplier = isSmallViewport ? 2 : 1;
+
+            if (!isPlaying) {
+                return;
+            }
 
             if (e.type === 'touchstart') {
                 wavepad.hasTouch = true;
@@ -121,29 +141,17 @@ var wavepad = (function () {
             x = e.pageX - surface.offsetLeft;
             y = e.pageY - surface.offsetTop;
 
-            if (isPlaying) {
-                wavepad.kill();
-            }
-
-            wavepad.routeSounds();
-
-            if (!source.start) {
-                source.start = source.noteOn;
-            }
-
-            source.start(0);
+            nodes.oscVolume.gain.value = 1;
 
             source.frequency.value = x * multiplier;
             wavepad.setFilterFrequency(y);
-
-            isPlaying = true;
 
             finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
             finger.classList.add('active');
 
             surface.addEventListener('touchmove', wavepad.effect, false);
             surface.addEventListener('touchend', wavepad.stop, false);
-            surface.addEventListener('touchcancel', wavepad.kill, false);
+            surface.addEventListener('touchcancel', wavepad.stop, false);
             surface.addEventListener('mousemove', wavepad.effect, false);
             surface.addEventListener('mouseup', wavepad.stop, false);
         },
@@ -161,11 +169,7 @@ var wavepad = (function () {
             if (isPlaying) {
                 source.frequency.value = x * multiplier;
                 wavepad.setFilterFrequency(y);
-                if (!source.stop) {
-                    source.stop = source.noteOff;
-                }
-                source.stop(0);
-                isPlaying = false;
+                nodes.oscVolume.gain.value = 0;
             }
 
             finger.classList.remove('active');
@@ -174,28 +178,7 @@ var wavepad = (function () {
             surface.removeEventListener('mouseup', wavepad.stop, false);
             surface.removeEventListener('touchmove', wavepad.effect, false);
             surface.removeEventListener('touchend', wavepad.stop, false);
-            surface.removeEventListener('touchcancel', wavepad.kill, false);
-        },
-
-        kill: function () {
-
-            if (isPlaying) {
-                if (!source.stop) {
-                    source.stop = source.noteOff;
-                }
-                source.stop(0);
-                isPlaying = false;
-            }
-
-            finger.classList.remove('active');
-
-            surface.removeEventListener('mousemove', wavepad.effect, false);
-            surface.removeEventListener('mouseup', wavepad.stop, false);
-            surface.removeEventListener('touchmove', wavepad.effect, false);
-            surface.removeEventListener('touchend', wavepad.stop, false);
-            surface.removeEventListener('touchcancel', wavepad.kill, false);
-
-            wavepad.hasTouch = false;
+            surface.removeEventListener('touchcancel', wavepad.stop, false);
         },
 
         effect: function (e) {
@@ -226,10 +209,7 @@ var wavepad = (function () {
         sliderChange: function (slider) {
 
             if (isPlaying) {
-                if (slider.id === 'waveform') {
-                    wavepad.stop();
-                    wavepad.play();
-                } else if (slider.id === 'frequency') {
+                if (slider.id === 'frequency') {
                     source.frequency.value = slider.value;
                 } else if (slider.id === 'delay') {
                     nodes.delay.delayTime.value = slider.value;

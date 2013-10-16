@@ -1,13 +1,13 @@
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
-html { 
+html {
 	-webkit-text-size-adjust: 100%;
 	-ms-text-size-adjust: 100%;
 	-webkit-user-select: none;
 	-webkit-tap-highlight-color: rgba(0,0,0,0);
-	-webkit-touch-callout: none; 
+	-webkit-touch-callout: none;
 }
- 
+
 body {
 	font:15px/20px Helvetica, Arial, Verdana, sans-serif;
 	text-shadow: rgba(0,0,0,0.7) 0px 1px 0px;
@@ -61,8 +61,8 @@ footer {
 }
 
 .container {
-	width: 512px; 
-	margin: 0 auto; 
+	width: 512px;
+	margin: 0 auto;
 	text-align: center;
 	-webkit-transition: -webkit-filter .1s ease-in-out;
 	transition: filter .1s ease-in-out;
@@ -78,8 +78,8 @@ footer {
 	position: relative;
 	overflow: hidden;
 	clear: both;
-	width: 512px; 
-	height: 512px; 
+	width: 512px;
+	height: 512px;
 	border: 5px solid #d81f38;
 	background: #100e16;
 	-webkit-border-radius: 15px;
@@ -137,13 +137,13 @@ footer {
 	filter: blur(15px);
 }
 
-canvas { 
+canvas {
 	-webkit-border-radius: 15px;
 	-moz-border-radius: 15px;
 	border-radius: 15px;
 }
 
-.oscillator, .filter {
+.power, .oscillator, .filter {
 	float: right;
 	margin-bottom: 1em;
 	margin-left: 1em;
@@ -156,7 +156,7 @@ canvas {
 
 .delay {
 	position: relative;
-	width: 512px;  
+	width: 512px;
 }
 
 .delay-time{
@@ -168,7 +168,7 @@ canvas {
 }
 
 #delay, #feedback {
-	-webkit-appearance: none; 
+	-webkit-appearance: none;
 	width: 200px;
 	height: 44px;
 	border: 5px solid #d81f38;
@@ -179,13 +179,13 @@ canvas {
 	color: #ffffff;
 }
 
-#delay::-webkit-slider-thumb, #feedback::-webkit-slider-thumb {  
-	-webkit-appearance: none; 
+#delay::-webkit-slider-thumb, #feedback::-webkit-slider-thumb {
+	-webkit-appearance: none;
 	width: 44px;
 	height: 44px;
-	-webkit-border-radius: 22px;  
+	-webkit-border-radius: 22px;
 	-moz-border-radius: 22px;
-	border-radius: 22px; 
+	border-radius: 22px;
 	background: #bebebe;
 	background: -moz-linear-gradient(top, #fdfdfd 0%, #bebebe 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fdfdfd), color-stop(100%,#bebebe));
@@ -197,20 +197,25 @@ canvas {
 
 button {
 	-webkit-appearance: none;
-	border: 2px solid #d81f38;
-	height: 44px;
-	color: #ffffff;
+	border: 1px solid #0e0e0e;
+	height: 33px;
+	padding: 5px;
+	color: rgba(255,255,255,1);
 	background: rgba(0,0,0,0.3);
 	-webkit-border-radius: 11px;
 	-moz-border-radius: 11px;
 	border-radius: 11px;
 }
 
+button.off {
+	color: rgba(255,255,255,.5);
+}
+
 button:active, button:focus {
 	background: rgba(0,0,0,0.5);
 }
 
-select { 
+select {
 	-webkit-appearance: none;
 	width: 100px;
 	height: 33px;
@@ -221,7 +226,7 @@ select {
 	font-weight: bold;
 }
 
-select:focus { 
+select:focus {
 	background: rgba(0,0,0,0.5);
 }
 
@@ -232,7 +237,7 @@ select:focus {
 	}
 
 	.container {
-		width: 256px; 
+		width: 256px;
 	}
 
 	.welcome {
@@ -244,15 +249,19 @@ select:focus {
 		margin: 1em auto 0 auto;
 	}
 
-	.oscillator, .filter {
+	.power, .oscillator, .filter {
 		float: none;
 		display: inline-block;
 		margin: 1em 0;
 	}
 
+	.power {
+		margin: 0 0 1em 0;
+	}
+
 	.surface {
-		width: 256px; 
-		height: 256px; 
+		width: 256px;
+		height: 256px;
 	}
 
 	.surface:before {
@@ -266,7 +275,7 @@ select:focus {
 	}
 
 	.delay {
-		width: 246px;  
+		width: 246px;
 	}
 
 	.delay-time{
@@ -279,4 +288,4 @@ select:focus {
 		margin: 0 auto;
 	}
 
-} 
+}
