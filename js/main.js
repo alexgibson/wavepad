@@ -128,7 +128,13 @@ var wavepad = (function () {
                 multiplier = isSmallViewport ? 2 : 1;
 
             if (!isPlaying) {
-                return;
+                if (!document.querySelector('.main').classList.contains('off')) {
+                    wavepad.routeSounds();
+                    isPlaying = true;
+                } else {
+                    return;
+                }
+
             }
 
             if (e.type === 'touchstart') {
@@ -212,9 +218,12 @@ var wavepad = (function () {
         sliderChange: function (slider) {
 
             if (isPlaying) {
-                if (slider.id === 'frequency') {
-                    source.frequency.value = slider.value;
-                } else if (slider.id === 'delay') {
+                if (!source.stop) {
+                    source.stop = source.noteOff;
+                }
+                source.stop(0);
+                isPlaying = false;
+                if (slider.id === 'delay') {
                     nodes.delay.delayTime.value = slider.value;
                 } else if (slider.id === 'feedback') {
                     nodes.feedbackGain.gain.value = slider.value;
