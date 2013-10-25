@@ -113,11 +113,11 @@ var wavepad = (function () {
                 }
                 source.stop(0);
                 myAudioAnalyser.disconnect();
-                doc.getElementById('power').classList.add('off');
+                doc.querySelector('.main').classList.add('off');
                 isPlaying = false;
             } else {
                 wavepad.routeSounds();
-                doc.getElementById('power').classList.remove('off');
+                doc.querySelector('.main').classList.remove('off');
                 isPlaying = true;
             }
         },
