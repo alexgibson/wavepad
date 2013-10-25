@@ -28,7 +28,7 @@
     <link rel="apple-touch-icon-precomposed" href="images/iOS-57.png" />
     <link rel="icon" href="images/iOS-57.png" />
 </head>
-<body class='main'>
+<body class="main off">
 <div class="container blurred">
     <header class="title">
         <h1>Wave-PD1</h1>
@@ -55,10 +55,14 @@
             <option value="7">All Pass</option>
         </select>
     </section>
+    <section class="power">
+        <h2>Power</h2>
+        <button id="power" type="button">On/Off</button>
+    </section>
     <section class="surface">
         <div class="finger"></div>
         <canvas></canvas>
-    </section> 
+    </section>
     <section class="delay">
         <div class="delay-time">
             <h2>Delay Time</h2>
@@ -67,7 +71,7 @@
         </div>
         <div class="delay-feedback">
             <h2>Feedback</h2>
-            <input id="feedback" type="range" min="0" max="0.9" step="0.1" value="0.8" />
+            <input id="feedback" type="range" min="0" max="0.9" step="0.1" value="0.4" />
             <output id="feedback-output" for="feedback"></output>
         </div>
     </section>
