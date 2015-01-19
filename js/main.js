@@ -3,6 +3,7 @@ var wavepad = (function () {
     'use strict';
 
     var canvas;
+    var main;
     var surface;
     var finger;
     var source;
@@ -46,6 +47,7 @@ var wavepad = (function () {
             doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
             doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
 
+            main = doc.querySelector('.main');
             canvas = doc.querySelector('canvas');
             surface = doc.querySelector('.surface');
             finger = doc.querySelector('.finger');
@@ -126,7 +128,7 @@ var wavepad = (function () {
                 multiplier = isSmallViewport ? 2 : 1;
 
             if (!isPlaying) {
-                if (!document.querySelector('.main').classList.contains('off')) {
+                if (!main.classList.contains('off')) {
                     wavepad.routeSounds();
                     isPlaying = true;
                 } else {
@@ -149,7 +151,7 @@ var wavepad = (function () {
             source.frequency.value = x * multiplier;
             wavepad.setFilterFrequency(y);
 
-            finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
+            finger.style.webkitTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
             finger.classList.add('active');
 
             surface.addEventListener('touchmove', wavepad.effect, false);
@@ -198,7 +200,7 @@ var wavepad = (function () {
                 wavepad.setFilterFrequency(y);
             }
 
-            finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
+            finger.style.webkitTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
         },
 
         updateOutputs: function () {
@@ -211,7 +213,6 @@ var wavepad = (function () {
             var value = option.value || this.value;
             var waves = isSafari ? [0,1,2,3] : ['sine', 'square', 'sawtooth', 'triangle'];
             source.type = waves[value];
-            console.log(value);
         },
 
         sliderChange: function (slider) {
