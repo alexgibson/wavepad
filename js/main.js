@@ -1,21 +1,18 @@
-/*global alert: false, clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, console: false, webkitAudioContext: false, AudioContext: false, requestAnimationFrame: false, Uint8Array: false, Tap: false */
-
 var wavepad = (function () {
 
     'use strict';
 
-    var surface,
-        finger,
-        source,
-        nodes = {},
-        myAudioContext,
-        myAudioAnalyser,
-        mySpectrum,
-        hasTouch = false,
-        isSmallViewport = false,
-        isMuted = false,
-        isPlaying = false,
-        isSafari = navigator.userAgent.indexOf("Safari") !== -1;
+    var canvas;
+    var surface;
+    var finger;
+    var source;
+    var nodes = {};
+    var myAudioContext;
+    var myAudioAnalyser;
+    var hasTouch = false;
+    var isSmallViewport = false;
+    var isPlaying = false;
+    var isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') == -1;
 
     return {
 
@@ -32,9 +29,9 @@ var wavepad = (function () {
             }
 
             if (window.matchMedia) {
-                isSmallViewport = window.matchMedia("(max-width: 512px)").matches ? true : false;
+                isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
 
-                window.matchMedia("(max-width: 512px)").addListener(function (mql) {
+                window.matchMedia('(max-width: 512px)').addListener(function (mql) {
                     if (mql.matches) {
                         isSmallViewport = true;
                     } else {
@@ -49,6 +46,7 @@ var wavepad = (function () {
             doc.getElementById('delay').addEventListener('input', wavepad.sliderChange, false);
             doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange, false);
 
+            canvas = doc.querySelector('canvas');
             surface = doc.querySelector('.surface');
             finger = doc.querySelector('.finger');
 
@@ -203,7 +201,7 @@ var wavepad = (function () {
             finger.style.webkitTransform = finger.style.MozTransform = finger.style.msTransform = finger.style.OTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
         },
 
-        updateOutputs: function (e) {
+        updateOutputs: function () {
             var doc = document;
             doc.getElementById('delay-output').value = Math.round(doc.getElementById('delay').value * 1000) + ' ms';
             doc.getElementById('feedback-output').value = Math.round(doc.getElementById('feedback').value * 10);
@@ -211,8 +209,9 @@ var wavepad = (function () {
 
         setWaveform: function (option) {
             var value = option.value || this.value;
-            var waves = isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"];
+            var waves = isSafari ? [0,1,2,3] : ['sine', 'square', 'sawtooth', 'triangle'];
             source.type = waves[value];
+            console.log(value);
         },
 
         sliderChange: function (slider) {
@@ -243,29 +242,30 @@ var wavepad = (function () {
         filterChange: function (option) {
             var value = option.value || this.value;
             var id = option.id || this.id;
-            var filters = isSafari ? [0,1,2,3,4,5,6,7] : ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
+            var filters = isSafari ? [0,1,2,3,4,5,6,7] : ['lowpass', 'highpass', 'bandpass', 'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass'];
+
             if (id === 'filter-type') {
                 nodes.filter.type = filters[value];
             }
         },
 
         animateSpectrum: function () {
-            mySpectrum = requestAnimationFrame(wavepad.animateSpectrum, document.querySelector('canvas'));
-            wavepad.drawSpectrum();
+            setTimeout(function() {
+                wavepad.drawSpectrum();
+                requestAnimationFrame(wavepad.animateSpectrum, canvas);
+            }, 1000 / 40);
         },
 
         drawSpectrum: function () {
-            var canvas = document.querySelector('canvas'),
-                ctx = canvas.getContext('2d'),
-                canvasSize = isSmallViewport ? 256 : 512,
-                multiplier = isSmallViewport ? 1 : 2,
-                width = canvasSize,
-                height = canvasSize,
-                bar_width = isSmallViewport ? 10 : 20,
-                freqByteData,
-                barCount,
-                magnitude,
-                i;
+            var ctx = canvas.getContext('2d');
+            var canvasSize = isSmallViewport ? 256 : 512;
+            var multiplier = isSmallViewport ? 1 : 2;
+            var width = canvasSize;
+            var height = canvasSize;
+            var barWidth = isSmallViewport ? 10 : 20;
+            var freqByteData;
+            var barCount;
+            var magnitude;
 
             canvas.width = canvasSize - 10;
             canvas.height = canvasSize - 10;
@@ -275,15 +275,15 @@ var wavepad = (function () {
 
             freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
             myAudioAnalyser.getByteFrequencyData(freqByteData);
-            barCount = Math.round(width / bar_width);
+            barCount = Math.round(width / barWidth);
 
-            for (i = 0; i < barCount; i += 1) {
+            for (var i = 0; i < barCount; i += 1) {
                 magnitude = freqByteData[i];
                 // some values need adjusting to fit on the canvas
-                ctx.fillRect(bar_width * i, height, bar_width - 1, -magnitude * multiplier);
+                ctx.fillRect(barWidth * i, height, barWidth - 1, -magnitude * multiplier);
             }
         }
     };
 }());
 
-window.addEventListener("DOMContentLoaded", wavepad.init, true);
+window.addEventListener('DOMContentLoaded', wavepad.init, true);
