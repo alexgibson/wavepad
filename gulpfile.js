@@ -11,7 +11,7 @@ var options = {
 };
 
 gulp.task('deploy', ['js:lint', 'js:compile'], function () {
-    return gulp.src(['./**/*', '!./node_modules/**'])
+    return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
         .pipe(deploy(options));
 });
 
