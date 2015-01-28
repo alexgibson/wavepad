@@ -11,7 +11,24 @@ let wavepad = (function () {
     let hasTouch = false;
     let isSmallViewport = false;
     let isPlaying = false;
-    let isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') == -1;
+
+    let filters = new Map();
+    filters.set('lowpass', 0);
+    filters.set('highpass', 1);
+    filters.set('bandpass', 2);
+    filters.set('lowshelf', 3);
+    filters.set('highshelf', 4);
+    filters.set('peaking', 5);
+    filters.set('notch', 6);
+    filters.set('allpass', 7);
+
+    let waves = new Map();
+    waves.set('sine', 0);
+    waves.set('square', 1);
+    waves.set('sawtooth', 2);
+    waves.set('triangle', 3);
+
+    const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') == -1;
 
     return {
 
@@ -208,8 +225,11 @@ let wavepad = (function () {
 
         setWaveform: function (option) {
             let value = option.value || this.value;
-            let waves = isSafari ? [0,1,2,3] : ['sine', 'square', 'sawtooth', 'triangle'];
-            source.type = waves[value];
+            if (isSafari) {
+                source.type = waves.get(value);
+            } else {
+                source.type = value;
+            }
         },
 
         sliderChange: function (slider) {
@@ -241,8 +261,11 @@ let wavepad = (function () {
             let id = option.id || this.id;
 
             if (id === 'filter-type') {
-                let filters = isSafari ? [0,1,2,3,4,5,6,7] : ['lowpass', 'highpass', 'bandpass', 'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass'];
-                nodes.filter.type = filters[value];
+                if (isSafari) {
+                    nodes.filter.type = filters.get(value);
+                } else {
+                    nodes.filter.type = value;
+                }
             }
         },
 
