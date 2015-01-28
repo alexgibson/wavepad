@@ -80,8 +80,8 @@ let wavepad = (function () {
             wavepad.updateOutputs();
             wavepad.animateSpectrum();
 
-            surface.addEventListener('mousedown', wavepad.play, false);
-            surface.addEventListener('touchstart', wavepad.play, false);
+            surface.addEventListener('mousedown', wavepad.play);
+            surface.addEventListener('touchstart', wavepad.play);
 
             doc.querySelector('.surface').addEventListener('touchmove', e => {
                 e.preventDefault();
