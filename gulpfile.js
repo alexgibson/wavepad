@@ -6,7 +6,7 @@ var deploy = require('gulp-gh-pages');
 var jshint = require('gulp-jshint');
 
 var options = {
-    branch: 'gh-pages'
+    cacheDir: './tmp'
 };
 
 gulp.task('deploy', ['js:lint'], function () {
