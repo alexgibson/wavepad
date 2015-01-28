@@ -10,7 +10,7 @@ var options = {
 };
 
 gulp.task('deploy', ['js:lint'], function () {
-    return gulp.src('./**/*')
+    return gulp.src(['./**/*', '!./node_modules/**'])
         .pipe(deploy(options));
 });
 
