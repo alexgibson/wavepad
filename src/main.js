@@ -1,308 +1,377 @@
-let wavepad = (function () {
+class Wavepad {
 
-    let canvas;
-    let main;
-    let surface;
-    let finger;
-    let source;
-    let nodes = {};
-    let myAudioContext;
-    let myAudioAnalyser;
-    let hasTouch = false;
-    let isSmallViewport = false;
-    let isPlaying = false;
+    constructor(options) {
 
-    let filters = new Map();
-    filters.set('lowpass', 0);
-    filters.set('highpass', 1);
-    filters.set('bandpass', 2);
-    filters.set('lowshelf', 3);
-    filters.set('highshelf', 4);
-    filters.set('peaking', 5);
-    filters.set('notch', 6);
-    filters.set('allpass', 7);
+        // default options
+        this.options = {
+            waveform: 'sine',
+            filter: 'lowpass'
+        };
 
-    let waves = new Map();
-    waves.set('sine', 0);
-    waves.set('square', 1);
-    waves.set('sawtooth', 2);
-    waves.set('triangle', 3);
-
-    const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') == -1;
-
-    return {
-
-        init: function () {
-            let doc = document;
-
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
-            if ('AudioContext' in window) {
-                myAudioContext = new AudioContext();
-            } else {
-                alert('Your browser does not yet support the Web Audio API');
-                return;
-            }
-
-            if (window.matchMedia) {
-                isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
-
-                window.matchMedia('(max-width: 512px)').addListener(mql => {
-                    if (mql.matches) {
-                        isSmallViewport = true;
-                    } else {
-                        isSmallViewport = false;
-                    }
-                });
-            }
-
-            doc.getElementById('power').addEventListener('click', wavepad.togglePower);
-            doc.getElementById('waveform').addEventListener('change', wavepad.setWaveform);
-            doc.getElementById('filter-type').addEventListener('change', wavepad.filterChange);
-            doc.getElementById('delay').addEventListener('input', wavepad.sliderChange);
-            doc.getElementById('feedback').addEventListener('input', wavepad.sliderChange);
-
-            main = doc.querySelector('.main');
-            canvas = doc.querySelector('canvas');
-            surface = doc.querySelector('.surface');
-            finger = doc.querySelector('.finger');
-
-            nodes.oscVolume = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
-            nodes.filter = myAudioContext.createBiquadFilter();
-            nodes.volume = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
-            nodes.delay = myAudioContext.createDelay ? myAudioContext.createDelay() : myAudioContext.createDelayNode();
-            nodes.feedbackGain = myAudioContext.createGain ? myAudioContext.createGain() : myAudioContext.createGainNode();
-            nodes.compressor = myAudioContext.createDynamicsCompressor();
-
-            myAudioAnalyser = myAudioContext.createAnalyser();
-            myAudioAnalyser.smoothingTimeConstant = 0.85;
-
-            wavepad.updateOutputs();
-            wavepad.animateSpectrum();
-
-            surface.addEventListener('mousedown', wavepad.play);
-            surface.addEventListener('touchstart', wavepad.play);
-
-            doc.querySelector('.surface').addEventListener('touchmove', e => {
-                e.preventDefault();
-            });
-        },
-
-        routeSounds: function () {
-            let doc = document;
-
-            source = myAudioContext.createOscillator();
-
-            wavepad.setWaveform(doc.getElementById('waveform'));
-            wavepad.filterChange(doc.getElementById('filter-type'));
-            nodes.feedbackGain.gain.value = doc.getElementById('feedback').value;
-            nodes.delay.delayTime.value = doc.getElementById('delay').value;
-            nodes.volume.gain.value = 0.2;
-            nodes.oscVolume.gain.value = 0;
-
-            source.connect(nodes.oscVolume);
-            nodes.oscVolume.connect(nodes.filter);
-            nodes.filter.connect(nodes.compressor);
-            nodes.filter.connect(nodes.delay);
-            nodes.delay.connect(nodes.feedbackGain);
-            nodes.delay.connect(nodes.compressor);
-            nodes.feedbackGain.connect(nodes.delay);
-            nodes.compressor.connect(nodes.volume);
-            nodes.volume.connect(myAudioAnalyser);
-            myAudioAnalyser.connect(myAudioContext.destination);
-
-            if (!source.start) {
-                source.start = source.noteOn;
-            }
-
-            source.start(0);
-        },
-
-        togglePower: function () {
-            let doc = document;
-
-            if (isPlaying) {
-                if (!source.stop) {
-                    source.stop = source.noteOff;
+        // set configurable options
+        if (typeof options === 'object') {
+            for (let i in options) {
+                if (options.hasOwnProperty(i)) {
+                    this.options[i] = options[i];
                 }
-                source.stop(0);
-                myAudioAnalyser.disconnect();
-                doc.querySelector('.main').classList.add('off');
-                isPlaying = false;
-            } else {
-                wavepad.routeSounds();
-                doc.querySelector('.main').classList.remove('off');
-                isPlaying = true;
-            }
-        },
-
-        play: function (e) {
-            let x;
-            let y;
-            let multiplier = isSmallViewport ? 2 : 1;
-
-            if (!isPlaying) {
-                if (!main.classList.contains('off')) {
-                    wavepad.routeSounds();
-                    isPlaying = true;
-                } else {
-                    return;
-                }
-
-            }
-
-            if (e.type === 'touchstart') {
-                hasTouch = true;
-            } else if (e.type === 'mousedown' && hasTouch) {
-                return;
-            }
-
-            x = e.pageX - surface.offsetLeft;
-            y = e.pageY - surface.offsetTop;
-
-            nodes.oscVolume.gain.value = 1;
-
-            source.frequency.value = x * multiplier;
-            wavepad.setFilterFrequency(y);
-
-            finger.style.webkitTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
-            finger.classList.add('active');
-
-            surface.addEventListener('touchmove', wavepad.effect);
-            surface.addEventListener('touchend', wavepad.stop);
-            surface.addEventListener('touchcancel', wavepad.stop);
-            surface.addEventListener('mousemove', wavepad.effect);
-            surface.addEventListener('mouseup', wavepad.stop);
-        },
-
-        stop: function (e) {
-            let x = e.pageX - surface.offsetLeft;
-            let y = e.pageY - surface.offsetTop;
-            let multiplier = isSmallViewport ? 2 : 1;
-
-            if (e.type === 'mouseup' && hasTouch) {
-                hasTouch = false;
-                return;
-            }
-
-            if (isPlaying) {
-                source.frequency.value = x * multiplier;
-                wavepad.setFilterFrequency(y);
-                nodes.oscVolume.gain.value = 0;
-            }
-
-            finger.classList.remove('active');
-
-            surface.removeEventListener('mousemove', wavepad.effect);
-            surface.removeEventListener('mouseup', wavepad.stop);
-            surface.removeEventListener('touchmove', wavepad.effect);
-            surface.removeEventListener('touchend', wavepad.stop);
-            surface.removeEventListener('touchcancel', wavepad.stop);
-        },
-
-        effect: function (e) {
-            let x = e.pageX - surface.offsetLeft;
-            let y = e.pageY - surface.offsetTop;
-            let multiplier = isSmallViewport ? 2 : 1;
-
-            if (e.type === 'mousemove' && hasTouch) {
-                return;
-            }
-
-            if (isPlaying) {
-                source.frequency.value = x * multiplier;
-                wavepad.setFilterFrequency(y);
-            }
-
-            finger.style.webkitTransform = finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
-        },
-
-        updateOutputs: function () {
-            let doc = document;
-            doc.getElementById('delay-output').value = Math.round(doc.getElementById('delay').value * 1000) + ' ms';
-            doc.getElementById('feedback-output').value = Math.round(doc.getElementById('feedback').value * 10);
-        },
-
-        setWaveform: function (option) {
-            let value = option.value || this.value;
-            if (isSafari) {
-                source.type = waves.get(value);
-            } else {
-                source.type = value;
-            }
-        },
-
-        sliderChange: function (slider) {
-            if (isPlaying) {
-                if (!source.stop) {
-                    source.stop = source.noteOff;
-                }
-                source.stop(0);
-                isPlaying = false;
-                if (slider.id === 'delay') {
-                    nodes.delay.delayTime.value = slider.value;
-                } else if (slider.id === 'feedback') {
-                    nodes.feedbackGain.gain.value = slider.value;
-                }
-            }
-            wavepad.updateOutputs();
-        },
-
-        setFilterFrequency: function (y) {
-            let min = 40; // min 40Hz
-            let max = myAudioContext.sampleRate / 2; // max half of the sampling rate
-            let numberOfOctaves = Math.log(max / min) / Math.LN2; // Logarithm (base 2) to compute how many octaves fall in the range.
-            let multiplier = Math.pow(2, numberOfOctaves * (((2 / surface.clientHeight) * (surface.clientHeight - y)) - 1.0)); // Compute a multiplier from 0 to 1 based on an exponential scale.
-            nodes.filter.frequency.value = max * multiplier; // Get back to the frequency value between min and max.
-        },
-
-        filterChange: function (option) {
-            let value = option.value || this.value;
-            let id = option.id || this.id;
-
-            if (id === 'filter-type') {
-                if (isSafari) {
-                    nodes.filter.type = filters.get(value);
-                } else {
-                    nodes.filter.type = value;
-                }
-            }
-        },
-
-        animateSpectrum: function () {
-            setTimeout(function() {
-                wavepad.drawSpectrum();
-                requestAnimationFrame(wavepad.animateSpectrum, canvas);
-            }, 1000 / 40);
-        },
-
-        drawSpectrum: function () {
-            let ctx = canvas.getContext('2d');
-            let canvasSize = isSmallViewport ? 256 : 512;
-            let multiplier = isSmallViewport ? 1 : 2;
-            let width = canvasSize;
-            let height = canvasSize;
-            let barWidth = isSmallViewport ? 10 : 20;
-            let freqByteData;
-            let barCount;
-
-            canvas.width = canvasSize - 10;
-            canvas.height = canvasSize - 10;
-
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#1d1c25';
-
-            freqByteData = new Uint8Array(myAudioAnalyser.frequencyBinCount);
-            myAudioAnalyser.getByteFrequencyData(freqByteData);
-            barCount = Math.round(width / barWidth);
-
-            for (let i = 0; i < barCount; i += 1) {
-                let magnitude = freqByteData[i];
-                // some values need adjusting to fit on the canvas
-                ctx.fillRect(barWidth * i, height, barWidth - 1, -magnitude * multiplier);
             }
         }
-    };
-}());
 
-window.addEventListener('DOMContentLoaded', wavepad.init, true);
+        // UI DOM references
+        let doc = document;
+        this.canvas = doc.querySelector('canvas');
+        this.main = doc.querySelector('.main');
+        this.surface = doc.querySelector('.surface');
+        this.finger = doc.querySelector('.finger');
+        this.waveform = doc.getElementById('waveform');
+        this.filter = doc.getElementById('filter-type');
+        this.powerToggle = doc.getElementById('power');
+        this.delayTimeInput = doc.getElementById('delay');
+        this.feedbackGainInput = doc.getElementById('feedback');
+        this.delayTimeOutput = doc.getElementById('delay-output');
+        this.feedbackGainOutput = doc.getElementById('feedback-output');
+
+        // Web Audio Node references
+        this.source = null;
+        this.nodes = {};
+        this.myAudioContext = null;
+        this.myAudioAnalyser = null;
+
+        // Map for legacy Web Audio filter values
+        this.filters = new Map();
+        this.filters.set('lowpass', 0);
+        this.filters.set('highpass', 1);
+        this.filters.set('bandpass', 2);
+        this.filters.set('lowshelf', 3);
+        this.filters.set('highshelf', 4);
+        this.filters.set('peaking', 5);
+        this.filters.set('notch', 6);
+        this.filters.set('allpass', 7);
+
+        // Map for legacy Web Audio waveform values
+        this.waves = new Map();
+        this.waves.set('sine', 0);
+        this.waves.set('square', 1);
+        this.waves.set('sawtooth', 2);
+        this.waves.set('triangle', 3);
+
+        this.hasTouch = false;
+        this.isSmallViewport = false;
+        this.isPlaying = false;
+
+        // Safari needs some special attention for its non-standards
+        this.isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') == -1;
+    }
+
+    init() {
+
+        // normalize and create a new AudioContext if supported
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+        if ('AudioContext' in window) {
+            this.myAudioContext = new AudioContext();
+        } else {
+            alert('Your browser does not yet support the Web Audio API');
+            return;
+        }
+
+        // get default surface size and listen for resize changes
+        if (window.matchMedia) {
+            this.isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
+
+            window.matchMedia('(max-width: 512px)').addListener(mql => {
+                if (mql.matches) {
+                    this.isSmallViewport = true;
+                } else {
+                    this.isSmallViewport = false;
+                }
+            });
+        }
+
+        // store references to bound events
+        // so we can unbind when needed
+        this.playHandler = this.play.bind(this);
+        this.effectHandler = this.effect.bind(this);
+        this.stopHandler = this.stop.bind(this);
+
+        // set default values that we're supplied
+        this.waveform.value = this.options.waveform;
+        this.filter.value = this.options.filter;
+        this.updateOutputs();
+
+        // bind UI control events
+        this.powerToggle.addEventListener('click', this.togglePower.bind(this));
+        this.waveform.addEventListener('change', this.setWaveform.bind(this));
+        this.filter.addEventListener('change', this.filterChange.bind(this));
+        this.delayTimeInput.addEventListener('input', this.sliderChange.bind(this));
+        this.feedbackGainInput.addEventListener('input', this.sliderChange.bind(this));
+
+        // create Web Audio nodes
+        this.nodes.oscVolume = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
+        this.nodes.filter = this.myAudioContext.createBiquadFilter();
+        this.nodes.volume = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
+        this.nodes.delay = this.myAudioContext.createDelay ? this.myAudioContext.createDelay() : this.myAudioContext.createDelayNode();
+        this.nodes.feedbackGain = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
+        this.nodes.compressor = this.myAudioContext.createDynamicsCompressor();
+
+        // create frequency analyser node
+        this.myAudioAnalyser = this.myAudioContext.createAnalyser();
+        this.myAudioAnalyser.smoothingTimeConstant = 0.85;
+
+        // start fAF for frequency analyser
+        this.animateSpectrum();
+
+        // prevent default scrolling when touchmove fires on surface
+        this.surface.removeEventListener('touchmove', e => {
+            e.preventDefault();
+        });
+    }
+
+    routeSounds() {
+        this.source = this.myAudioContext.createOscillator();
+
+        this.setWaveform(this.waveform);
+        this.filterChange(this.filter);
+        this.nodes.feedbackGain.gain.value = this.feedbackGainInput.value;
+        this.nodes.delay.delayTime.value = this.delayTimeInput.value;
+        this.nodes.volume.gain.value = 0.2;
+        this.nodes.oscVolume.gain.value = 0;
+
+        this.source.connect(this.nodes.oscVolume);
+        this.nodes.oscVolume.connect(this.nodes.filter);
+        this.nodes.filter.connect(this.nodes.compressor);
+        this.nodes.filter.connect(this.nodes.delay);
+        this.nodes.delay.connect(this.nodes.feedbackGain);
+        this.nodes.delay.connect(this.nodes.compressor);
+        this.nodes.feedbackGain.connect(this.nodes.delay);
+        this.nodes.compressor.connect(this.nodes.volume);
+        this.nodes.volume.connect(this.myAudioAnalyser);
+        this.myAudioAnalyser.connect(this.myAudioContext.destination);
+    }
+
+    startOsc() {
+        if (!this.source.start) {
+            this.source.start = this.source.noteOn;
+        }
+        this.source.start(0);
+        this.isPlaying = true;
+    }
+
+    stopOsc() {
+        if (!this.source.stop) {
+            this.source.stop = this.source.noteOff;
+        }
+        this.source.stop(0);
+        this.isPlaying = false;
+    }
+
+    bindSurfaceEvents() {
+        this.surface.addEventListener('mousedown', this.playHandler);
+        this.surface.addEventListener('touchstart', this.playHandler);
+    }
+
+    unbindSurfaceEvents() {
+        this.surface.removeEventListener('mousedown', this.playHandler);
+        this.surface.removeEventListener('mousemove', this.effectHandler);
+        this.surface.removeEventListener('mouseup', this.stopHandler);
+        this.surface.removeEventListener('touchstart', this.playHandler);
+        this.surface.removeEventListener('touchmove', this.effectHandler);
+        this.surface.removeEventListener('touchend', this.stopHandler);
+        this.surface.removeEventListener('touchcancel', this.stopHandler);
+    }
+
+    togglePower() {
+        if (this.isPlaying) {
+            this.stopOsc();
+            this.myAudioAnalyser.disconnect();
+            this.unbindSurfaceEvents();
+            this.main.classList.add('off');
+        } else {
+            this.routeSounds();
+            this.startOsc();
+            this.bindSurfaceEvents();
+            this.main.classList.remove('off');
+        }
+    }
+
+    play(e) {
+        let x;
+        let y;
+        let multiplier = this.isSmallViewport ? 2 : 1;
+
+        if (!this.isPlaying) {
+            this.routeSounds();
+            this.startOsc();
+        }
+
+        if (e.type === 'touchstart') {
+            this.hasTouch = true;
+        } else if (e.type === 'mousedown' && this.hasTouch) {
+            return;
+        }
+
+        x = e.pageX - this.surface.offsetLeft;
+        y = e.pageY - this.surface.offsetTop;
+
+        this.nodes.oscVolume.gain.value = 1;
+
+        this.source.frequency.value = x * multiplier;
+        this.setFilterFrequency(y);
+
+        this.finger.style.webkitTransform = this.finger.style.transform = 'translate3d(' + x + 'px,' + y  + 'px, 0)';
+        this.finger.classList.add('active');
+
+        this.surface.addEventListener('touchmove', this.effectHandler);
+        this.surface.addEventListener('touchend', this.stopHandler);
+        this.surface.addEventListener('touchcancel', this.stopHandler);
+        this.surface.addEventListener('mousemove', this.effectHandler);
+        this.surface.addEventListener('mouseup', this.stopHandler);
+    }
+
+    stop(e) {
+        let x = e.pageX - this.surface.offsetLeft;
+        let y = e.pageY - this.surface.offsetTop;
+        let multiplier = this.isSmallViewport ? 2 : 1;
+
+        if (e.type === 'mouseup' && this.hasTouch) {
+            this.hasTouch = false;
+            return;
+        }
+
+        if (this.isPlaying) {
+            this.source.frequency.value = x * multiplier;
+            this.setFilterFrequency(y);
+            this.nodes.oscVolume.gain.value = 0;
+        }
+
+        this.finger.classList.remove('active');
+
+        this.surface.removeEventListener('mousemove', this.effectHandler);
+        this.surface.removeEventListener('mouseup', this.stopHandler);
+        this.surface.removeEventListener('touchmove', this.effectHandler);
+        this.surface.removeEventListener('touchend', this.stopHandler);
+        this.surface.removeEventListener('touchcancel', this.stopHandler);
+    }
+
+    effect(e) {
+        let x = e.pageX - this.surface.offsetLeft;
+        let y = e.pageY - this.surface.offsetTop;
+        let multiplier = this.isSmallViewport ? 2 : 1;
+
+        if (e.type === 'mousemove' && this.hasTouch) {
+            return;
+        }
+
+        if (this.isPlaying) {
+            this.source.frequency.value = x * multiplier;
+            this.setFilterFrequency(y);
+        }
+
+        this.finger.style.webkitTransform = this.finger.style.transform = 'translate3d(' + x + 'px,' + y + 'px, 0)';
+    }
+
+    updateOutputs() {
+        this.delayTimeOutput.value = Math.round(this.delayTimeInput.value * 1000) + ' ms';
+        this.feedbackGainOutput.value = Math.round(this.feedbackGainInput.value * 10);
+    }
+
+    setWaveform(option) {
+        let value = option.value || option.target.value;
+        if (this.isSafari) {
+            this.source.type = this.waves.get(value);
+        } else {
+            this.source.type = value;
+        }
+    }
+
+    sliderChange(slider) {
+        if (this.isPlaying) {
+            this.stopOsc();
+            if (slider.id === 'delay') {
+                this.nodes.delay.delayTime.value = slider.value;
+            } else if (slider.id === 'feedback') {
+                this.nodes.feedbackGain.gain.value = slider.value;
+            }
+        }
+        this.updateOutputs();
+    }
+
+    /**
+     * Set filter frequency based on (y) axis value
+     */
+    setFilterFrequency(y) {
+        // min 40Hz
+        let min = 40;
+        // max half of the sampling rate
+        let max = this.myAudioContext.sampleRate / 2;
+        // Logarithm (base 2) to compute how many octaves fall in the range.
+        let numberOfOctaves = Math.log(max / min) / Math.LN2;
+        // Compute a multiplier from 0 to 1 based on an exponential scale.
+        let multiplier = Math.pow(2, numberOfOctaves * (((2 / this.surface.clientHeight) * (this.surface.clientHeight - y)) - 1.0));
+        // Get back to the frequency value between min and max.
+        this.nodes.filter.frequency.value = max * multiplier;
+    }
+
+    filterChange(option) {
+        let value = option.value || option.target.value;
+        let id = option.id || option.target.id;
+
+        if (id === 'filter-type') {
+            if (this.isSafari) {
+                this.nodes.filter.type = this.filters.get(value);
+            } else {
+                this.nodes.filter.type = value;
+            }
+        }
+    }
+
+    animateSpectrum() {
+        // Limit canvas redraw to 40 fps
+        setTimeout(this.onTick.bind(this), 1000 / 40);
+    }
+
+    onTick() {
+        this.drawSpectrum();
+        requestAnimationFrame(this.animateSpectrum.bind(this), this.canvas);
+    }
+
+    /**
+     * Draw the canvas frequency data graph
+     */
+    drawSpectrum() {
+        let ctx = this.canvas.getContext('2d');
+        let canvasSize = this.isSmallViewport ? 256 : 512;
+        let multiplier = this.isSmallViewport ? 1 : 2;
+        let width = canvasSize;
+        let height = canvasSize;
+        let barWidth = this.isSmallViewport ? 10 : 20;
+        let freqByteData;
+        let barCount;
+
+        this.canvas.width = canvasSize - 10;
+        this.canvas.height = canvasSize - 10;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#1d1c25';
+
+        freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
+        this.myAudioAnalyser.getByteFrequencyData(freqByteData);
+        barCount = Math.round(width / barWidth);
+
+        for (let i = 0; i < barCount; i += 1) {
+            let magnitude = freqByteData[i];
+            // some values need adjusting to fit on the canvas
+            ctx.fillRect(barWidth * i, height, barWidth - 1, -magnitude * multiplier);
+        }
+    }
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+
+    var wavepad = new Wavepad({
+        'waveform': 'square',
+        'filter': 'lowpass'
+    });
+
+    wavepad.init();
+}, true);
