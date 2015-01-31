@@ -128,7 +128,7 @@ var Wavepad = (function () {
                 this.animateSpectrum();
 
                 // prevent default scrolling when touchmove fires on surface
-                this.surface.removeEventListener("touchmove", function (e) {
+                this.surface.addEventListener("touchmove", function (e) {
                     e.preventDefault();
                 });
             },
