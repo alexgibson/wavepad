@@ -122,7 +122,7 @@ class Wavepad {
         this.animateSpectrum();
 
         // prevent default scrolling when touchmove fires on surface
-        this.surface.removeEventListener('touchmove', e => {
+        this.surface.addEventListener('touchmove', e => {
             e.preventDefault();
         });
     }
