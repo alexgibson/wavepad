@@ -1,56 +1,59 @@
-* { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+* {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
 html {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     -webkit-user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-touch-callout: none;
 }
 
 body {
     font:15px/20px Helvetica, Arial, Verdana, sans-serif;
-    text-shadow: rgba(0,0,0,0.7) 0px 1px 0px;
+    text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 0px;
     background: #7d7e7d;
-    background: -moz-radial-gradient(center, ellipse cover, #7d7e7d 0%, #0e0e0e 100%);
-    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#7d7e7d), color-stop(100%,#0e0e0e));
-    background: -webkit-radial-gradient(center, ellipse cover, #7d7e7d 0%,#0e0e0e 100%);
-    background: -o-radial-gradient(center, ellipse cover, #7d7e7d 0%,#0e0e0e 100%);
-    background: -ms-radial-gradient(center, ellipse cover, #7d7e7d 0%,#0e0e0e 100%);
-    background: radial-gradient(ellipse at center, #7d7e7d 0%,#0e0e0e 100%);
+    background: -webkit-radial-gradient(center, ellipse cover, #7d7e7d 0%, #0e0e0e 100%);
+    background: radial-gradient(ellipse at center, #7d7e7d 0%, #0e0e0e 100%);
 }
 
 h1 {
-    font-family: AvenirNextCondensed-Heavy, Helvetica, Arial, Verdana, sans-serif;
+    font-family: Helvetica, Arial, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    color: #ffffff;
+    color: #fff;
     font-size: 30px;
     text-transform: uppercase;
 }
 
-h2 {
-    color: #ffffff;
+label {
+    display: block;
+    color: #fff;
     font-size: 13px;
+    font-weight: bold;
+    margin: .5em 0;
 }
 
 p {
-    color: #ffffff;
+    color: #fff;
 }
 
 a:link, a:visited {
-    color: #ffffff;
+    color: #fff;
     text-decoration: underline;
 }
 
 a:hover, a:active {
-    color: #ffffff;
+    color: #fff;
     text-decoration: none;
 }
 
 output {
     display: block;
-    color: #ffffff;
+    color: #fff;
 }
 
 footer {
@@ -60,18 +63,11 @@ footer {
     overflow: hidden;
 }
 
-.container {
+main {
+    display: block;
     width: 512px;
     margin: 0 auto;
     text-align: center;
-    -webkit-transition: -webkit-filter .1s ease-in-out;
-    transition: filter .1s ease-in-out;
-}
-
-.welcome h2 {
-    font-family: AvenirNextCondensed-Heavy, Helvetica, Arial, Verdana, sans-serif;
-    font-size: 24px;
-    text-transform: uppercase;
 }
 
 .surface {
@@ -82,8 +78,6 @@ footer {
     height: 512px;
     border: 5px solid rgba(216, 31, 56, 1);
     background: #100e16;
-    -webkit-border-radius: 15px;
-    -moz-border-radius: 15px;
     border-radius: 15px;
     cursor: pointer;
 }
@@ -124,13 +118,8 @@ footer {
     background: #d81f38;
     top: -33px;
     left: -33px;
-    -webkit-border-radius: 33px;
-    -moz-border-radius: 33px;
     border-radius: 33px;
     -webkit-transition: background .1s ease-in-out;
-    -moz-transition: background .1s ease-in-out;
-    -ms-transition: background .1s ease-in-out;
-    -o-transition: background .1s ease-in-out;
     transition: background .1s ease-in-out;
     cursor: pointer;
 }
@@ -142,8 +131,6 @@ footer {
 }
 
 canvas {
-    -webkit-border-radius: 15px;
-    -moz-border-radius: 15px;
     border-radius: 15px;
 }
 
@@ -173,12 +160,11 @@ canvas {
 
 #delay, #feedback {
     -webkit-appearance: none;
+    -moz-appearance: none;
     width: 200px;
     height: 44px;
     border: 5px solid rgba(216, 31, 56, 1);
     background: #100e16;
-    -webkit-border-radius: 22px;
-    -moz-border-radius: 22px;
     border-radius: 22px;
     color: #ffffff;
 }
@@ -188,62 +174,57 @@ canvas {
     border: 5px solid rgba(216, 31, 56, 0.5);
 }
 
-#delay::-webkit-slider-thumb, #feedback::-webkit-slider-thumb {
+#delay::-webkit-slider-thumb,
+#feedback::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 44px;
     height: 44px;
-    -webkit-border-radius: 22px;
-    -moz-border-radius: 22px;
     border-radius: 22px;
     background: #bebebe;
-    background: -moz-linear-gradient(top, #fdfdfd 0%, #bebebe 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fdfdfd), color-stop(100%,#bebebe));
-    background: -webkit-linear-gradient(top, #fdfdfd 0%,#bebebe 100%);
-    background: -o-linear-gradient(top, #fdfdfd 0%,#bebebe 100%);
-    background: -ms-linear-gradient(top, #fdfdfd 0%,#bebebe 100%);
-    background: linear-gradient(to bottom, #fdfdfd 0%,#bebebe 100%);
+    background: -webkit-linear-gradient(top, #fdfdfd 0%, #bebebe 100%);
+    background: linear-gradient(to bottom, #fdfdfd 0%, #bebebe 100%);
 }
 
 button {
     -webkit-appearance: none;
+    -moz-appearance: none;
     border: 1px solid #0e0e0e;
     height: 33px;
     padding: 5px;
-    color: rgba(255,255,255,1);
+    color: rgba(255, 255, 255, 1);
     font-weight: bold;
-    background: rgba(0,0,0,0.3);
-    -webkit-border-radius: 11px;
-    -moz-border-radius: 11px;
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 11px;
     cursor: pointer;
 }
 
 .off button {
-    color: rgba(255,255,255,.5);
+    color: rgba(255, 255, 255, .5);
 }
 
 .off button:hover,
 .off button:focus {
-    color: rgba(255,255,255,1);
+    color: rgba(255, 255, 255, 1);
 }
 
 button:active, button:focus {
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 select {
     -webkit-appearance: none;
+    -moz-appearance: none;
     width: 100px;
     height: 33px;
     padding: 5px;
     border: 1px solid #0e0e0e;
-    background: rgba(0,0,0,0.3);
-    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
     font-weight: bold;
 }
 
 select:focus {
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 @media only screen and (max-width : 512px) {
@@ -252,12 +233,8 @@ select:focus {
         width: 256px;
     }
 
-    .container {
+    main {
         width: 256px;
-    }
-
-    .welcome {
-        top: 30px;
     }
 
     .title {
@@ -294,7 +271,7 @@ select:focus {
         width: 246px;
     }
 
-    .delay-time{
+    .delay-time {
         float: none;
         margin: 0 auto;
     }

@@ -82,22 +82,20 @@ var Wavepad = (function () {
                 }
 
                 // get default surface size and listen for resize changes
-                if (window.matchMedia) {
-                    this.isSmallViewport = window.matchMedia("(max-width: 512px)").matches ? true : false;
+                this.isSmallViewport = window.matchMedia("(max-width: 512px)").matches ? true : false;
 
-                    window.matchMedia("(max-width: 512px)").addListener(function (mql) {
-                        if (mql.matches) {
-                            _this.isSmallViewport = true;
-                        } else {
-                            _this.isSmallViewport = false;
-                        }
-                    });
-                }
+                window.matchMedia("(max-width: 512px)").addListener(function (mql) {
+                    if (mql.matches) {
+                        _this.isSmallViewport = true;
+                    } else {
+                        _this.isSmallViewport = false;
+                    }
+                });
 
                 // store references to bound events
                 // so we can unbind when needed
                 this.playHandler = this.play.bind(this);
-                this.effectHandler = this.effect.bind(this);
+                this.moveHandler = this.move.bind(this);
                 this.stopHandler = this.stop.bind(this);
 
                 // set default values that we're supplied
@@ -198,12 +196,7 @@ var Wavepad = (function () {
         unbindSurfaceEvents: {
             value: function unbindSurfaceEvents() {
                 this.surface.removeEventListener("mousedown", this.playHandler);
-                this.surface.removeEventListener("mousemove", this.effectHandler);
-                this.surface.removeEventListener("mouseup", this.stopHandler);
                 this.surface.removeEventListener("touchstart", this.playHandler);
-                this.surface.removeEventListener("touchmove", this.effectHandler);
-                this.surface.removeEventListener("touchend", this.stopHandler);
-                this.surface.removeEventListener("touchcancel", this.stopHandler);
             },
             writable: true,
             enumerable: true,
@@ -215,13 +208,13 @@ var Wavepad = (function () {
                     this.stopOsc();
                     this.myAudioAnalyser.disconnect();
                     this.unbindSurfaceEvents();
-                    this.main.classList.add("off");
                 } else {
                     this.routeSounds();
                     this.startOsc();
                     this.bindSurfaceEvents();
-                    this.main.classList.remove("off");
                 }
+
+                this.main.classList.toggle("off");
             },
             writable: true,
             enumerable: true,
@@ -229,8 +222,8 @@ var Wavepad = (function () {
         },
         play: {
             value: function play(e) {
-                var x = undefined;
-                var y = undefined;
+                var x = e.pageX - this.surface.offsetLeft;
+                var y = e.pageY - this.surface.offsetTop;
                 var multiplier = this.isSmallViewport ? 2 : 1;
 
                 if (!this.isPlaying) {
@@ -244,58 +237,25 @@ var Wavepad = (function () {
                     return;
                 }
 
-                x = e.pageX - this.surface.offsetLeft;
-                y = e.pageY - this.surface.offsetTop;
-
                 this.nodes.oscVolume.gain.value = 1;
-
                 this.source.frequency.value = x * multiplier;
                 this.setFilterFrequency(y);
 
-                this.finger.style.webkitTransform = this.finger.style.transform = "translate3d(" + x + "px," + y + "px, 0)";
+                this.finger.style.webkitTransform = this.finger.style.transform = "translate3d(" + x + "px, " + y + "px, 0)";
                 this.finger.classList.add("active");
 
-                this.surface.addEventListener("touchmove", this.effectHandler);
+                this.surface.addEventListener("touchmove", this.moveHandler);
                 this.surface.addEventListener("touchend", this.stopHandler);
                 this.surface.addEventListener("touchcancel", this.stopHandler);
-                this.surface.addEventListener("mousemove", this.effectHandler);
+                this.surface.addEventListener("mousemove", this.moveHandler);
                 this.surface.addEventListener("mouseup", this.stopHandler);
             },
             writable: true,
             enumerable: true,
             configurable: true
         },
-        stop: {
-            value: function stop(e) {
-                var x = e.pageX - this.surface.offsetLeft;
-                var y = e.pageY - this.surface.offsetTop;
-                var multiplier = this.isSmallViewport ? 2 : 1;
-
-                if (e.type === "mouseup" && this.hasTouch) {
-                    this.hasTouch = false;
-                    return;
-                }
-
-                if (this.isPlaying) {
-                    this.source.frequency.value = x * multiplier;
-                    this.setFilterFrequency(y);
-                    this.nodes.oscVolume.gain.value = 0;
-                }
-
-                this.finger.classList.remove("active");
-
-                this.surface.removeEventListener("mousemove", this.effectHandler);
-                this.surface.removeEventListener("mouseup", this.stopHandler);
-                this.surface.removeEventListener("touchmove", this.effectHandler);
-                this.surface.removeEventListener("touchend", this.stopHandler);
-                this.surface.removeEventListener("touchcancel", this.stopHandler);
-            },
-            writable: true,
-            enumerable: true,
-            configurable: true
-        },
-        effect: {
-            value: function effect(e) {
+        move: {
+            value: function move(e) {
                 var x = e.pageX - this.surface.offsetLeft;
                 var y = e.pageY - this.surface.offsetTop;
                 var multiplier = this.isSmallViewport ? 2 : 1;
@@ -309,7 +269,31 @@ var Wavepad = (function () {
                     this.setFilterFrequency(y);
                 }
 
-                this.finger.style.webkitTransform = this.finger.style.transform = "translate3d(" + x + "px," + y + "px, 0)";
+                this.finger.style.webkitTransform = this.finger.style.transform = "translate3d(" + x + "px, " + y + "px, 0)";
+            },
+            writable: true,
+            enumerable: true,
+            configurable: true
+        },
+        stop: {
+            value: function stop(e) {
+                var x = e.pageX - this.surface.offsetLeft;
+                var y = e.pageY - this.surface.offsetTop;
+                var multiplier = this.isSmallViewport ? 2 : 1;
+
+                if (this.isPlaying) {
+                    this.source.frequency.value = x * multiplier;
+                    this.setFilterFrequency(y);
+                    this.nodes.oscVolume.gain.value = 0;
+                }
+
+                this.finger.classList.remove("active");
+
+                this.surface.removeEventListener("mousemove", this.moveHandler);
+                this.surface.removeEventListener("mouseup", this.stopHandler);
+                this.surface.removeEventListener("touchmove", this.moveHandler);
+                this.surface.removeEventListener("touchend", this.stopHandler);
+                this.surface.removeEventListener("touchcancel", this.stopHandler);
             },
             writable: true,
             enumerable: true,
@@ -327,11 +311,7 @@ var Wavepad = (function () {
         setWaveform: {
             value: function setWaveform(option) {
                 var value = option.value || option.target.value;
-                if (this.isSafari) {
-                    this.source.type = this.waves.get(value);
-                } else {
-                    this.source.type = value;
-                }
+                this.source.type = this.isSafari ? this.waves.get(value) : value;
             },
             writable: true,
             enumerable: true,
@@ -380,11 +360,7 @@ var Wavepad = (function () {
                 var id = option.id || option.target.id;
 
                 if (id === "filter-type") {
-                    if (this.isSafari) {
-                        this.nodes.filter.type = this.filters.get(value);
-                    } else {
-                        this.nodes.filter.type = value;
-                    }
+                    this.nodes.filter.type = this.isSafari ? this.filters.get(value) : value;
                 }
             },
             writable: true,
@@ -418,26 +394,22 @@ var Wavepad = (function () {
                 var ctx = this.canvas.getContext("2d");
                 var canvasSize = this.isSmallViewport ? 256 : 512;
                 var multiplier = this.isSmallViewport ? 1 : 2;
-                var width = canvasSize;
-                var height = canvasSize;
                 var barWidth = this.isSmallViewport ? 10 : 20;
-                var freqByteData = undefined;
-                var barCount = undefined;
+                var freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
+                var barCount = Math.round(canvasSize / barWidth);
 
                 this.canvas.width = canvasSize - 10;
                 this.canvas.height = canvasSize - 10;
 
-                ctx.clearRect(0, 0, width, height);
+                ctx.clearRect(0, 0, canvasSize, canvasSize);
                 ctx.fillStyle = "#1d1c25";
 
-                freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
                 this.myAudioAnalyser.getByteFrequencyData(freqByteData);
-                barCount = Math.round(width / barWidth);
 
                 for (var i = 0; i < barCount; i += 1) {
                     var magnitude = freqByteData[i];
                     // some values need adjusting to fit on the canvas
-                    ctx.fillRect(barWidth * i, height, barWidth - 1, -magnitude * multiplier);
+                    ctx.fillRect(barWidth * i, canvasSize, barWidth - 1, -magnitude * multiplier);
                 }
             },
             writable: true,
@@ -456,4 +428,4 @@ window.addEventListener("DOMContentLoaded", function () {
     });
 
     wavepad.init();
-}, true);
+});
