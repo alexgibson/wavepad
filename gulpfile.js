@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var gulp = require('gulp');
-var to5 = require('gulp-6to5');
 var watch = require('gulp-watch');
 var deploy = require('gulp-gh-pages');
 var jshint = require('gulp-jshint');
