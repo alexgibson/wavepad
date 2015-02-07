@@ -338,12 +338,4 @@ class Wavepad {
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-
-    var wavepad = new Wavepad({
-        'waveform': 'square',
-        'filter': 'lowpass'
-    });
-
-    wavepad.init();
-});
+export default Wavepad;
