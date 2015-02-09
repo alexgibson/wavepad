@@ -18,18 +18,17 @@ class Wavepad {
         }
 
         // UI DOM references
-        let doc = document;
-        this.canvas = doc.querySelector('canvas');
-        this.main = doc.querySelector('.main');
-        this.surface = doc.querySelector('.surface');
-        this.finger = doc.querySelector('.finger');
-        this.waveform = doc.getElementById('waveform');
-        this.filter = doc.getElementById('filter-type');
-        this.powerToggle = doc.getElementById('power');
-        this.delayTimeInput = doc.getElementById('delay');
-        this.feedbackGainInput = doc.getElementById('feedback');
-        this.delayTimeOutput = doc.getElementById('delay-output');
-        this.feedbackGainOutput = doc.getElementById('feedback-output');
+        this.canvas = document.querySelector('canvas');
+        this.main = document.querySelector('.main');
+        this.surface = document.querySelector('.surface');
+        this.finger = document.querySelector('.finger');
+        this.waveform = document.getElementById('waveform');
+        this.filter = document.getElementById('filter-type');
+        this.powerToggle = document.getElementById('power');
+        this.delayTimeInput = document.getElementById('delay');
+        this.feedbackGainInput = document.getElementById('feedback');
+        this.delayTimeOutput = document.getElementById('delay-output');
+        this.feedbackGainOutput = document.getElementById('feedback-output');
 
         // Web Audio Node references
         this.source = null;
@@ -78,12 +77,15 @@ class Wavepad {
         // get default surface size and listen for resize changes
         this.isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
 
+        this.setCanvasSize();
+
         window.matchMedia('(max-width: 512px)').addListener(mql => {
             if (mql.matches) {
                 this.isSmallViewport = true;
             } else {
                 this.isSmallViewport = false;
             }
+            this.setCanvasSize();
         });
 
         // store references to bound events
@@ -320,6 +322,11 @@ class Wavepad {
         requestAnimationFrame(this.animateSpectrum.bind(this), this.canvas);
     }
 
+    setCanvasSize() {
+        let canvasSize = this.isSmallViewport ? 256 : 512;
+        this.canvas.width = this.canvas.height = canvasSize - 10;
+    }
+
     /**
      * Draw the canvas frequency data graph
      */
@@ -330,8 +337,6 @@ class Wavepad {
         let barWidth = this.isSmallViewport ? 10 : 20;
         let freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
         let barCount = Math.round(canvasSize / barWidth);
-
-        this.canvas.width = this.canvas.height = canvasSize - 10;
 
         ctx.clearRect(0, 0, canvasSize, canvasSize);
         ctx.fillStyle = '#1d1c25';
