@@ -188,9 +188,12 @@ class Wavepad {
     }
 
     play(e) {
-        let x = e.pageX - this.surface.offsetLeft;
-        let y = e.pageY - this.surface.offsetTop;
+        let x = e.type === 'touchstart' ? e.touches[0].pageX : e.pageX;
+        let y = e.type === 'touchstart' ? e.touches[0].pageY : e.pageY;
         let multiplier = this.isSmallViewport ? 2 : 1;
+
+        x = x - this.surface.offsetLeft;
+        y = y - this.surface.offsetTop;
 
         if (!this.isPlaying) {
             this.routeSounds();
@@ -218,9 +221,12 @@ class Wavepad {
     }
 
     move(e) {
-        let x = e.pageX - this.surface.offsetLeft;
-        let y = e.pageY - this.surface.offsetTop;
+        let x = e.type === 'touchmove' ? e.touches[0].pageX : e.pageX;
+        let y = e.type === 'touchmove' ? e.touches[0].pageY : e.pageY;
         let multiplier = this.isSmallViewport ? 2 : 1;
+
+        x = x - this.surface.offsetLeft;
+        y = y - this.surface.offsetTop;
 
         if (e.type === 'mousemove' && this.hasTouch) {
             return;
@@ -235,9 +241,12 @@ class Wavepad {
     }
 
     stop(e) {
-        let x = e.pageX - this.surface.offsetLeft;
-        let y = e.pageY - this.surface.offsetTop;
+        let x = e.type === 'touchend' ? e.changedTouches[0].pageX : e.pageX;
+        let y = e.type === 'touchend' ? e.changedTouches[0].pageY : e.pageY;
         let multiplier = this.isSmallViewport ? 2 : 1;
+
+        x = x - this.surface.offsetLeft;
+        y = y - this.surface.offsetTop;
 
         if (this.isPlaying) {
             this.source.frequency.value = x * multiplier;
@@ -322,8 +331,7 @@ class Wavepad {
         let freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
         let barCount = Math.round(canvasSize / barWidth);
 
-        this.canvas.width = canvasSize - 10;
-        this.canvas.height = canvasSize - 10;
+        this.canvas.width = this.canvas.height = canvasSize - 10;
 
         ctx.clearRect(0, 0, canvasSize, canvasSize);
         ctx.fillStyle = '#1d1c25';
