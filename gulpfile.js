@@ -6,7 +6,7 @@ var watch = require('gulp-watch');
 var deploy = require('gulp-gh-pages');
 var jshint = require('gulp-jshint');
 var browserify = require('browserify');
-var to5ify = require('6to5ify');
+var babelify = require('babelify');
 
 var options = {
     cacheDir: './tmp'
@@ -19,7 +19,7 @@ gulp.task('deploy', ['js:lint', 'js:compile'], function () {
 
 gulp.task('js:compile', function() {
     browserify({ debug: true })
-    .transform(to5ify)
+    .transform(babelify)
     .require('./src/app.js', {
         entry: true
     })
