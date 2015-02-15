@@ -29,7 +29,7 @@ class Wavepad {
         this.delayTimeOutput = document.getElementById('delay-output');
         this.feedbackGainOutput = document.getElementById('feedback-output');
 
-        // Canvas graph
+        // Canvas graph for audio frequency analyzer
         this.canvas = document.querySelector('canvas');
         this.ctx = this.canvas.getContext('2d');
 
@@ -77,19 +77,8 @@ class Wavepad {
             return;
         }
 
-        // get default surface size and listen for resize changes
-        this.isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
-
-        this.setCanvasSize();
-
-        window.matchMedia('(max-width: 512px)').addListener(mql => {
-            if (mql.matches) {
-                this.isSmallViewport = true;
-            } else {
-                this.isSmallViewport = false;
-            }
-            this.setCanvasSize();
-        });
+        // bind resize handler for canvas & touch references
+        this.handleResize();
 
         // store references to bound events
         // so we can unbind when needed
@@ -127,6 +116,22 @@ class Wavepad {
         // prevent default scrolling when touchmove fires on surface
         this.surface.addEventListener('touchmove', e => {
             e.preventDefault();
+        });
+    }
+
+    handleResize() {
+        // set default canvas size
+        this.isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
+        this.setCanvasSize();
+
+        // listen for resize events
+        window.matchMedia('(max-width: 512px)').addListener(mql => {
+            if (mql.matches) {
+                this.isSmallViewport = true;
+            } else {
+                this.isSmallViewport = false;
+            }
+            this.setCanvasSize();
         });
     }
 
@@ -197,19 +202,19 @@ class Wavepad {
         let y = e.type === 'touchstart' ? e.touches[0].pageY : e.pageY;
         const multiplier = this.isSmallViewport ? 2 : 1;
 
-        x = x - this.surface.offsetLeft;
-        y = y - this.surface.offsetTop;
+        if (e.type === 'touchstart') {
+            this.hasTouch = true;
+        } else if (e.type === 'mousedown' && this.hasTouch) {
+            return;
+        }
 
         if (!this.isPlaying) {
             this.routeSounds();
             this.startOsc();
         }
 
-        if (e.type === 'touchstart') {
-            this.hasTouch = true;
-        } else if (e.type === 'mousedown' && this.hasTouch) {
-            return;
-        }
+        x = x - this.surface.offsetLeft;
+        y = y - this.surface.offsetTop;
 
         this.nodes.oscVolume.gain.value = 1;
         this.source.frequency.value = x * multiplier;
@@ -229,15 +234,14 @@ class Wavepad {
         let x = e.type === 'touchmove' ? e.touches[0].pageX : e.pageX;
         let y = e.type === 'touchmove' ? e.touches[0].pageY : e.pageY;
 
-        x = x - this.surface.offsetLeft;
-        y = y - this.surface.offsetTop;
-
         if (e.type === 'mousemove' && this.hasTouch) {
             return;
         }
 
         if (this.isPlaying) {
             const multiplier = this.isSmallViewport ? 2 : 1;
+            x = x - this.surface.offsetLeft;
+            y = y - this.surface.offsetTop;
             this.source.frequency.value = x * multiplier;
             this.setFilterFrequency(y);
         }
@@ -249,11 +253,10 @@ class Wavepad {
         let x = e.type === 'touchend' ? e.changedTouches[0].pageX : e.pageX;
         let y = e.type === 'touchend' ? e.changedTouches[0].pageY : e.pageY;
 
-        x = x - this.surface.offsetLeft;
-        y = y - this.surface.offsetTop;
-
         if (this.isPlaying) {
             const multiplier = this.isSmallViewport ? 2 : 1;
+            x = x - this.surface.offsetLeft;
+            y = y - this.surface.offsetTop;
             this.source.frequency.value = x * multiplier;
             this.setFilterFrequency(y);
             this.nodes.oscVolume.gain.value = 0;
