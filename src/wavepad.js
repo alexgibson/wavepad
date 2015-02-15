@@ -228,7 +228,6 @@ class Wavepad {
     move(e) {
         let x = e.type === 'touchmove' ? e.touches[0].pageX : e.pageX;
         let y = e.type === 'touchmove' ? e.touches[0].pageY : e.pageY;
-        const multiplier = this.isSmallViewport ? 2 : 1;
 
         x = x - this.surface.offsetLeft;
         y = y - this.surface.offsetTop;
@@ -238,6 +237,7 @@ class Wavepad {
         }
 
         if (this.isPlaying) {
+            const multiplier = this.isSmallViewport ? 2 : 1;
             this.source.frequency.value = x * multiplier;
             this.setFilterFrequency(y);
         }
@@ -248,12 +248,12 @@ class Wavepad {
     stop(e) {
         let x = e.type === 'touchend' ? e.changedTouches[0].pageX : e.pageX;
         let y = e.type === 'touchend' ? e.changedTouches[0].pageY : e.pageY;
-        const multiplier = this.isSmallViewport ? 2 : 1;
 
         x = x - this.surface.offsetLeft;
         y = y - this.surface.offsetTop;
 
         if (this.isPlaying) {
+            const multiplier = this.isSmallViewport ? 2 : 1;
             this.source.frequency.value = x * multiplier;
             this.setFilterFrequency(y);
             this.nodes.oscVolume.gain.value = 0;
@@ -331,7 +331,6 @@ class Wavepad {
      */
     drawSpectrum() {
         const canvasSize = this.isSmallViewport ? 256 : 512;
-        const multiplier = this.isSmallViewport ? 1 : 2;
         const barWidth = this.isSmallViewport ? 10 : 20;
         const barCount = Math.round(canvasSize / barWidth);
         const freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
@@ -343,6 +342,7 @@ class Wavepad {
 
         for (let i = 0; i < barCount; i += 1) {
             const magnitude = freqByteData[i];
+            const multiplier = this.isSmallViewport ? 1 : 2;
             // some values need adjusting to fit on the canvas
             this.ctx.fillRect(barWidth * i, canvasSize, barWidth - 1, -magnitude * multiplier);
         }
