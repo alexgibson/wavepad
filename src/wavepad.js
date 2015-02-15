@@ -18,7 +18,6 @@ class Wavepad {
         }
 
         // UI DOM references
-        this.canvas = document.querySelector('canvas');
         this.main = document.querySelector('.main');
         this.surface = document.querySelector('.surface');
         this.finger = document.querySelector('.finger');
@@ -29,6 +28,10 @@ class Wavepad {
         this.feedbackGainInput = document.getElementById('feedback');
         this.delayTimeOutput = document.getElementById('delay-output');
         this.feedbackGainOutput = document.getElementById('feedback-output');
+
+        // Canvas graph
+        this.canvas = document.querySelector('canvas');
+        this.ctx = this.canvas.getContext('2d');
 
         // Web Audio Node references
         this.source = null;
@@ -192,7 +195,7 @@ class Wavepad {
     play(e) {
         let x = e.type === 'touchstart' ? e.touches[0].pageX : e.pageX;
         let y = e.type === 'touchstart' ? e.touches[0].pageY : e.pageY;
-        let multiplier = this.isSmallViewport ? 2 : 1;
+        const multiplier = this.isSmallViewport ? 2 : 1;
 
         x = x - this.surface.offsetLeft;
         y = y - this.surface.offsetTop;
@@ -225,7 +228,7 @@ class Wavepad {
     move(e) {
         let x = e.type === 'touchmove' ? e.touches[0].pageX : e.pageX;
         let y = e.type === 'touchmove' ? e.touches[0].pageY : e.pageY;
-        let multiplier = this.isSmallViewport ? 2 : 1;
+        const multiplier = this.isSmallViewport ? 2 : 1;
 
         x = x - this.surface.offsetLeft;
         y = y - this.surface.offsetTop;
@@ -245,7 +248,7 @@ class Wavepad {
     stop(e) {
         let x = e.type === 'touchend' ? e.changedTouches[0].pageX : e.pageX;
         let y = e.type === 'touchend' ? e.changedTouches[0].pageY : e.pageY;
-        let multiplier = this.isSmallViewport ? 2 : 1;
+        const multiplier = this.isSmallViewport ? 2 : 1;
 
         x = x - this.surface.offsetLeft;
         y = y - this.surface.offsetTop;
@@ -271,7 +274,7 @@ class Wavepad {
     }
 
     setWaveform(option) {
-        let value = option.value || option.target.value;
+        const value = option.value || option.target.value;
         this.source.type = this.isSafari ? this.waves.get(value) : value;
     }
 
@@ -292,24 +295,20 @@ class Wavepad {
      */
     setFilterFrequency(y) {
         // min 40Hz
-        let min = 40;
+        const min = 40;
         // max half of the sampling rate
-        let max = this.myAudioContext.sampleRate / 2;
+        const max = this.myAudioContext.sampleRate / 2;
         // Logarithm (base 2) to compute how many octaves fall in the range.
-        let numberOfOctaves = Math.log(max / min) / Math.LN2;
+        const numberOfOctaves = Math.log(max / min) / Math.LN2;
         // Compute a multiplier from 0 to 1 based on an exponential scale.
-        let multiplier = Math.pow(2, numberOfOctaves * (((2 / this.surface.clientHeight) * (this.surface.clientHeight - y)) - 1.0));
+        const multiplier = Math.pow(2, numberOfOctaves * (((2 / this.surface.clientHeight) * (this.surface.clientHeight - y)) - 1.0));
         // Get back to the frequency value between min and max.
         this.nodes.filter.frequency.value = max * multiplier;
     }
 
     filterChange(option) {
-        let value = option.value || option.target.value;
-        let id = option.id || option.target.id;
-
-        if (id === 'filter-type') {
-            this.nodes.filter.type = this.isSafari ? this.filters.get(value) : value;
-        }
+        const value = option.value || option.target.value;
+        this.nodes.filter.type = this.isSafari ? this.filters.get(value) : value;
     }
 
     animateSpectrum() {
@@ -323,7 +322,7 @@ class Wavepad {
     }
 
     setCanvasSize() {
-        let canvasSize = this.isSmallViewport ? 256 : 512;
+        const canvasSize = this.isSmallViewport ? 256 : 512;
         this.canvas.width = this.canvas.height = canvasSize - 10;
     }
 
@@ -331,22 +330,21 @@ class Wavepad {
      * Draw the canvas frequency data graph
      */
     drawSpectrum() {
-        let ctx = this.canvas.getContext('2d');
-        let canvasSize = this.isSmallViewport ? 256 : 512;
-        let multiplier = this.isSmallViewport ? 1 : 2;
-        let barWidth = this.isSmallViewport ? 10 : 20;
-        let freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
-        let barCount = Math.round(canvasSize / barWidth);
+        const canvasSize = this.isSmallViewport ? 256 : 512;
+        const multiplier = this.isSmallViewport ? 1 : 2;
+        const barWidth = this.isSmallViewport ? 10 : 20;
+        const barCount = Math.round(canvasSize / barWidth);
+        const freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
 
-        ctx.clearRect(0, 0, canvasSize, canvasSize);
-        ctx.fillStyle = '#1d1c25';
+        this.ctx.clearRect(0, 0, canvasSize, canvasSize);
+        this.ctx.fillStyle = '#1d1c25';
 
         this.myAudioAnalyser.getByteFrequencyData(freqByteData);
 
         for (let i = 0; i < barCount; i += 1) {
-            let magnitude = freqByteData[i];
+            const magnitude = freqByteData[i];
             // some values need adjusting to fit on the canvas
-            ctx.fillRect(barWidth * i, canvasSize, barWidth - 1, -magnitude * multiplier);
+            this.ctx.fillRect(barWidth * i, canvasSize, barWidth - 1, -magnitude * multiplier);
         }
     }
 }
