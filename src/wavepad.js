@@ -4,10 +4,11 @@ class Wavepad {
 
         // default options
         this.options = {
-            waveform: 'sine',
+            waveform: 'square',
             filter: 'lowpass',
             delay: 0.500,
-            feedback: 0.4
+            feedback: 0.4,
+            barColor: '#1d1c25'
         };
 
         // set configurable options
@@ -17,6 +18,21 @@ class Wavepad {
                     this.options[i] = options[i];
                 }
             }
+        }
+
+        // Web Audio Node references
+        this.source = null;
+        this.nodes = {};
+        this.myAudioContext = null;
+        this.myAudioAnalyser = null;
+
+        // normalize and create a new AudioContext if supported
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+        if ('AudioContext' in window) {
+            this.myAudioContext = new AudioContext();
+        } else {
+            throw new Error('wavepad.js: browser does not support Web Audio API');
         }
 
         if (typeof id !== 'string' && typeof id !== 'object') {
@@ -38,12 +54,6 @@ class Wavepad {
         // Canvas graph for audio frequency analyzer
         this.canvas = this.synth.querySelector('canvas');
         this.ctx = this.canvas.getContext('2d');
-
-        // Web Audio Node references
-        this.source = null;
-        this.nodes = {};
-        this.myAudioContext = null;
-        this.myAudioAnalyser = null;
 
         // Map for legacy Web Audio filter values
         this.filters = new Map();
@@ -72,15 +82,6 @@ class Wavepad {
     }
 
     init() {
-
-        // normalize and create a new AudioContext if supported
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
-        if ('AudioContext' in window) {
-            this.myAudioContext = new AudioContext();
-        } else {
-            throw new Error('wavepad.js: browser does not support Web Audio API');
-        }
 
         // bind resize handler for canvas & touch references
         this.handleResize();
@@ -116,6 +117,9 @@ class Wavepad {
         // create frequency analyser node
         this.myAudioAnalyser = this.myAudioContext.createAnalyser();
         this.myAudioAnalyser.smoothingTimeConstant = 0.85;
+
+        // set canvas graph color
+        this.ctx.fillStyle = this.options.barColor;
 
         // start fAF for frequency analyser
         this.animateSpectrum();
@@ -352,7 +356,6 @@ class Wavepad {
         const freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
 
         this.ctx.clearRect(0, 0, canvasSize, canvasSize);
-        this.ctx.fillStyle = '#1d1c25';
 
         this.myAudioAnalyser.getByteFrequencyData(freqByteData);
 
