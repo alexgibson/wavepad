@@ -1,6 +1,6 @@
 class Wavepad {
 
-    constructor(options) {
+    constructor(id, options) {
 
         // default options
         this.options = {
@@ -19,20 +19,24 @@ class Wavepad {
             }
         }
 
+        if (typeof id !== 'string' && typeof id !== 'object') {
+            throw new Error('wavepad.js: first argument must be a valid DOM identifier');
+        }
+
         // UI DOM references
-        this.main = document.querySelector('.main');
-        this.surface = document.querySelector('.surface');
-        this.finger = document.querySelector('.finger');
-        this.waveform = document.getElementById('waveform');
-        this.filter = document.getElementById('filter-type');
-        this.powerToggle = document.getElementById('power');
-        this.delayTimeInput = document.getElementById('delay');
-        this.feedbackGainInput = document.getElementById('feedback');
-        this.delayTimeOutput = document.getElementById('delay-output');
-        this.feedbackGainOutput = document.getElementById('feedback-output');
+        this.synth = typeof id === 'object' ? id : document.getElementById(id);
+        this.surface = this.synth.querySelector('.surface');
+        this.finger = this.synth.querySelector('.finger');
+        this.waveform = this.synth.querySelector('#waveform');
+        this.filter = this.synth.querySelector('#filter-type');
+        this.powerToggle = this.synth.querySelector('#power');
+        this.delayTimeInput = this.synth.querySelector('#delay');
+        this.feedbackGainInput = this.synth.querySelector('#feedback');
+        this.delayTimeOutput = this.synth.querySelector('#delay-output');
+        this.feedbackGainOutput = this.synth.querySelector('#feedback-output');
 
         // Canvas graph for audio frequency analyzer
-        this.canvas = document.querySelector('canvas');
+        this.canvas = this.synth.querySelector('canvas');
         this.ctx = this.canvas.getContext('2d');
 
         // Web Audio Node references
@@ -75,7 +79,7 @@ class Wavepad {
         if ('AudioContext' in window) {
             this.myAudioContext = new AudioContext();
         } else {
-            throw new Error('browser does not support Web Audio API');
+            throw new Error('wavepad.js: browser does not support Web Audio API');
         }
 
         // bind resize handler for canvas & touch references
@@ -197,7 +201,7 @@ class Wavepad {
             this.bindSurfaceEvents();
         }
 
-        this.main.classList.toggle('off');
+        this.synth.classList.toggle('off');
     }
 
     play(e) {
