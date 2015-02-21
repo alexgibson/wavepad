@@ -118,9 +118,6 @@ class Wavepad {
         this.myAudioAnalyser = this.myAudioContext.createAnalyser();
         this.myAudioAnalyser.smoothingTimeConstant = 0.85;
 
-        // set canvas graph color
-        this.ctx.fillStyle = this.options.barColor;
-
         // start fAF for frequency analyser
         this.animateSpectrum();
 
@@ -344,6 +341,8 @@ class Wavepad {
     setCanvasSize() {
         const canvasSize = this.isSmallViewport ? 256 : 512;
         this.canvas.width = this.canvas.height = canvasSize - 10;
+        // set canvas graph color
+        this.ctx.fillStyle = this.options.barColor;
     }
 
     /**
