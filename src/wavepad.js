@@ -5,7 +5,9 @@ class Wavepad {
         // default options
         this.options = {
             waveform: 'sine',
-            filter: 'lowpass'
+            filter: 'lowpass',
+            delay: 0.500,
+            feedback: 0.4
         };
 
         // set configurable options
@@ -73,8 +75,7 @@ class Wavepad {
         if ('AudioContext' in window) {
             this.myAudioContext = new AudioContext();
         } else {
-            alert('Your browser does not yet support the Web Audio API');
-            return;
+            throw new Error('browser does not support Web Audio API');
         }
 
         // bind resize handler for canvas & touch references
@@ -87,6 +88,8 @@ class Wavepad {
         this.stopHandler = this.stop.bind(this);
 
         // set default values that we're supplied
+        this.delayTimeInput.value = this.options.delay;
+        this.feedbackGainInput.value = this.options.feedback;
         this.waveform.value = this.options.waveform;
         this.filter.value = this.options.filter;
         this.updateOutputs();
@@ -95,8 +98,8 @@ class Wavepad {
         this.powerToggle.addEventListener('click', this.togglePower.bind(this));
         this.waveform.addEventListener('change', this.setWaveform.bind(this));
         this.filter.addEventListener('change', this.filterChange.bind(this));
-        this.delayTimeInput.addEventListener('input', this.sliderChange.bind(this));
-        this.feedbackGainInput.addEventListener('input', this.sliderChange.bind(this));
+        this.delayTimeInput.addEventListener('input', this.delayChange.bind(this));
+        this.feedbackGainInput.addEventListener('input', this.feedbackChange.bind(this));
 
         // create Web Audio nodes
         this.nodes.oscVolume = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
@@ -140,8 +143,8 @@ class Wavepad {
 
         this.setWaveform(this.waveform);
         this.filterChange(this.filter);
-        this.nodes.feedbackGain.gain.value = this.feedbackGainInput.value;
-        this.nodes.delay.delayTime.value = this.delayTimeInput.value;
+        this.nodes.feedbackGain.gain.value = this.options.feedback;
+        this.nodes.delay.delayTime.value = this.options.delay;
         this.nodes.volume.gain.value = 0.2;
         this.nodes.oscVolume.gain.value = 0;
 
@@ -218,7 +221,7 @@ class Wavepad {
 
         this.nodes.oscVolume.gain.value = 1;
         this.source.frequency.value = x * multiplier;
-        this.setFilterFrequency(y);
+        this.nodes.filter.frequency.value = this.setFilterFrequency(y);
 
         this.finger.style.webkitTransform = this.finger.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         this.finger.classList.add('active');
@@ -243,7 +246,7 @@ class Wavepad {
             x = x - this.surface.offsetLeft;
             y = y - this.surface.offsetTop;
             this.source.frequency.value = x * multiplier;
-            this.setFilterFrequency(y);
+            this.nodes.filter.frequency.value = this.setFilterFrequency(y);
         }
 
         this.finger.style.webkitTransform = this.finger.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -258,7 +261,7 @@ class Wavepad {
             x = x - this.surface.offsetLeft;
             y = y - this.surface.offsetTop;
             this.source.frequency.value = x * multiplier;
-            this.setFilterFrequency(y);
+            this.nodes.filter.frequency.value = this.setFilterFrequency(y);
             this.nodes.oscVolume.gain.value = 0;
         }
 
@@ -281,14 +284,20 @@ class Wavepad {
         this.source.type = this.isSafari ? this.waves.get(value) : value;
     }
 
-    sliderChange(slider) {
+    delayChange(e) {
+        this.options.delay = e.target.value;
         if (this.isPlaying) {
             this.stopOsc();
-            if (slider.id === 'delay') {
-                this.nodes.delay.delayTime.value = slider.value;
-            } else if (slider.id === 'feedback') {
-                this.nodes.feedbackGain.gain.value = slider.value;
-            }
+            this.nodes.delay.delayTime.value = this.options.delay;
+        }
+        this.updateOutputs();
+    }
+
+    feedbackChange(e) {
+        this.options.feedback = e.target.value;
+        if (this.isPlaying) {
+            this.stopOsc();
+            this.nodes.feedbackGain.gain.value = this.options.feedback;
         }
         this.updateOutputs();
     }
@@ -306,7 +315,7 @@ class Wavepad {
         // Compute a multiplier from 0 to 1 based on an exponential scale.
         const multiplier = Math.pow(2, numberOfOctaves * (((2 / this.surface.clientHeight) * (this.surface.clientHeight - y)) - 1.0));
         // Get back to the frequency value between min and max.
-        this.nodes.filter.frequency.value = max * multiplier;
+        return max * multiplier;
     }
 
     filterChange(option) {
