@@ -186,6 +186,17 @@ canvas {
     background: linear-gradient(to bottom, #fdfdfd 0%, #bebebe 100%);
 }
 
+#delay::-moz-range-thumb,
+#feedback::-moz-range-thumb {
+    -moz-appearance: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: #bebebe;
+    border: none;
+    background: linear-gradient(to bottom, #fdfdfd 0%, #bebebe 100%);
+}
+
 button {
     -webkit-appearance: none;
     -moz-appearance: none;
