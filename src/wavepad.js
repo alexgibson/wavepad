@@ -141,17 +141,11 @@ class Wavepad {
     }
 
     startOsc() {
-        if (!this.source.start) {
-            this.source.start = this.source.noteOn;
-        }
         this.source.start(0);
         this.isPlaying = true;
     }
 
     stopOsc() {
-        if (!this.source.stop) {
-            this.source.stop = this.source.noteOff;
-        }
         this.source.stop(0);
         this.isPlaying = false;
     }
