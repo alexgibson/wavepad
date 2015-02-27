@@ -55,30 +55,9 @@ class Wavepad {
         this.canvas = this.synth.querySelector('canvas');
         this.ctx = this.canvas.getContext('2d');
 
-        // Map for legacy Web Audio filter values
-        this.filters = new Map();
-        this.filters.set('lowpass', 0);
-        this.filters.set('highpass', 1);
-        this.filters.set('bandpass', 2);
-        this.filters.set('lowshelf', 3);
-        this.filters.set('highshelf', 4);
-        this.filters.set('peaking', 5);
-        this.filters.set('notch', 6);
-        this.filters.set('allpass', 7);
-
-        // Map for legacy Web Audio waveform values
-        this.waves = new Map();
-        this.waves.set('sine', 0);
-        this.waves.set('square', 1);
-        this.waves.set('sawtooth', 2);
-        this.waves.set('triangle', 3);
-
         this.hasTouch = false;
         this.isSmallViewport = false;
         this.isPlaying = false;
-
-        // Safari needs some special attention for its non-standards
-        this.isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') == -1;
     }
 
     init() {
@@ -107,11 +86,11 @@ class Wavepad {
         this.feedbackGainInput.addEventListener('input', this.feedbackChange.bind(this));
 
         // create Web Audio nodes
-        this.nodes.oscVolume = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
+        this.nodes.oscVolume = this.myAudioContext.createGain();
         this.nodes.filter = this.myAudioContext.createBiquadFilter();
-        this.nodes.volume = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
-        this.nodes.delay = this.myAudioContext.createDelay ? this.myAudioContext.createDelay() : this.myAudioContext.createDelayNode();
-        this.nodes.feedbackGain = this.myAudioContext.createGain ? this.myAudioContext.createGain() : this.myAudioContext.createGainNode();
+        this.nodes.volume = this.myAudioContext.createGain();
+        this.nodes.delay = this.myAudioContext.createDelay();
+        this.nodes.feedbackGain = this.myAudioContext.createGain();
         this.nodes.compressor = this.myAudioContext.createDynamicsCompressor();
 
         // create frequency analyser node
@@ -134,11 +113,7 @@ class Wavepad {
 
         // listen for resize events
         window.matchMedia('(max-width: 512px)').addListener(mql => {
-            if (mql.matches) {
-                this.isSmallViewport = true;
-            } else {
-                this.isSmallViewport = false;
-            }
+            this.isSmallViewport = mql.matches ? true : false;
             this.setCanvasSize();
         });
     }
@@ -166,17 +141,11 @@ class Wavepad {
     }
 
     startOsc() {
-        if (!this.source.start) {
-            this.source.start = this.source.noteOn;
-        }
         this.source.start(0);
         this.isPlaying = true;
     }
 
     stopOsc() {
-        if (!this.source.stop) {
-            this.source.stop = this.source.noteOff;
-        }
         this.source.stop(0);
         this.isPlaying = false;
     }
@@ -286,7 +255,7 @@ class Wavepad {
 
     setWaveform(option) {
         const value = option.value || option.target.value;
-        this.source.type = this.isSafari ? this.waves.get(value) : value;
+        this.source.type = value;
     }
 
     delayChange(e) {
@@ -325,7 +294,7 @@ class Wavepad {
 
     filterChange(option) {
         const value = option.value || option.target.value;
-        this.nodes.filter.type = this.isSafari ? this.filters.get(value) : value;
+        this.nodes.filter.type = value;
     }
 
     animateSpectrum() {
