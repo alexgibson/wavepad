@@ -134,11 +134,7 @@ class Wavepad {
 
         // listen for resize events
         window.matchMedia('(max-width: 512px)').addListener(mql => {
-            if (mql.matches) {
-                this.isSmallViewport = true;
-            } else {
-                this.isSmallViewport = false;
-            }
+            this.isSmallViewport = mql.matches ? true : false;
             this.setCanvasSize();
         });
     }
