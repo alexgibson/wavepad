@@ -7,6 +7,7 @@ var deploy = require('gulp-gh-pages');
 var jshint = require('gulp-jshint');
 var browserify = require('browserify');
 var babelify = require('babelify');
+var uglify = require('gulp-uglify');
 
 var options = {
     cacheDir: './tmp'
@@ -19,7 +20,9 @@ gulp.task('deploy', ['js:lint', 'js:compile'], function () {
 
 gulp.task('js:compile', function() {
     browserify({ debug: true })
-    .transform(babelify)
+    .transform(babelify.configure({
+      sourceMapRelative: '/Users/alexgibson/Git/wavepad/'
+    }))
     .require('./src/app.js', {
         entry: true
     })
@@ -42,3 +45,5 @@ gulp.task('default', function () {
         gulp.start('js:compile');
     });
 });
+
+
