@@ -1,7 +1,6 @@
 class Wavepad {
 
     constructor(id, options) {
-
         // default options
         this.options = {
             waveform: 'square',
@@ -61,13 +60,12 @@ class Wavepad {
     }
 
     init() {
-
         // bind resize handler for canvas & touch references
         this.handleResize();
 
         // store references to bound events
         // so we can unbind when needed
-        this.playHandler = this.play.bind(this);
+        this.startHandler = this.start.bind(this);
         this.moveHandler = this.move.bind(this);
         this.stopHandler = this.stop.bind(this);
 
@@ -107,12 +105,13 @@ class Wavepad {
     }
 
     handleResize() {
+        var breakPoint = window.matchMedia('(max-width: 512px)');
         // set default canvas size
-        this.isSmallViewport = window.matchMedia('(max-width: 512px)').matches ? true : false;
+        this.isSmallViewport = breakPoint.matches ? true : false;
         this.setCanvasSize();
 
         // listen for resize events
-        window.matchMedia('(max-width: 512px)').addListener(mql => {
+        breakPoint.addListener(mql => {
             this.isSmallViewport = mql.matches ? true : false;
             this.setCanvasSize();
         });
@@ -151,13 +150,13 @@ class Wavepad {
     }
 
     bindSurfaceEvents() {
-        this.surface.addEventListener('mousedown', this.playHandler);
-        this.surface.addEventListener('touchstart', this.playHandler);
+        this.surface.addEventListener('mousedown', this.startHandler);
+        this.surface.addEventListener('touchstart', this.startHandler);
     }
 
     unbindSurfaceEvents() {
-        this.surface.removeEventListener('mousedown', this.playHandler);
-        this.surface.removeEventListener('touchstart', this.playHandler);
+        this.surface.removeEventListener('mousedown', this.startHandler);
+        this.surface.removeEventListener('touchstart', this.startHandler);
     }
 
     togglePower() {
@@ -174,7 +173,7 @@ class Wavepad {
         this.synth.classList.toggle('off');
     }
 
-    play(e) {
+    start(e) {
         let x = e.type === 'touchstart' ? e.touches[0].pageX : e.pageX;
         let y = e.type === 'touchstart' ? e.touches[0].pageY : e.pageY;
         const multiplier = this.isSmallViewport ? 2 : 1;
@@ -254,8 +253,7 @@ class Wavepad {
     }
 
     setWaveform(option) {
-        const value = option.value || option.target.value;
-        this.source.type = value;
+        this.source.type = option.value || option.target.value;
     }
 
     delayChange(e) {
@@ -293,8 +291,7 @@ class Wavepad {
     }
 
     filterChange(option) {
-        const value = option.value || option.target.value;
-        this.nodes.filter.type = value;
+        this.nodes.filter.type = option.value || option.target.value;
     }
 
     animateSpectrum() {
@@ -304,7 +301,7 @@ class Wavepad {
 
     onTick() {
         this.drawSpectrum();
-        requestAnimationFrame(this.animateSpectrum.bind(this), this.canvas);
+        requestAnimationFrame(this.animateSpectrum.bind(this));
     }
 
     setCanvasSize() {
@@ -323,9 +320,8 @@ class Wavepad {
         const barCount = Math.round(canvasSize / barWidth);
         const freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
 
-        this.ctx.clearRect(0, 0, canvasSize, canvasSize);
-
         this.myAudioAnalyser.getByteFrequencyData(freqByteData);
+        this.ctx.clearRect(0, 0, canvasSize, canvasSize);
 
         for (let i = 0; i < barCount; i += 1) {
             const magnitude = freqByteData[i];
