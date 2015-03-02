@@ -13,15 +13,18 @@ var options = {
     cacheDir: './tmp'
 };
 
+var _debug = false;
+var _sourceMapPath = '/Users/alexgibson/Git/wavepad/';
+
 gulp.task('deploy', ['js:lint', 'js:compile'], function () {
     return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
         .pipe(deploy(options));
 });
 
 gulp.task('js:compile', function() {
-    browserify({ debug: true })
+    browserify({ debug: _debug })
     .transform(babelify.configure({
-      sourceMapRelative: '/Users/alexgibson/Git/wavepad/'
+      sourceMapRelative: _sourceMapPath
     }))
     .require('./src/app.js', {
         entry: true
