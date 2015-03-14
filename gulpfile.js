@@ -30,7 +30,7 @@ var buildOptions = {
     cacheDir: './tmp'
 };
 
-gulp.task('deploy', ['js:compile'], function () {
+gulp.task('deploy', function () {
     return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
         .pipe(deploy(buildOptions));
 });
