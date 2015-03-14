@@ -19,8 +19,8 @@ Install
 npm install
 ```
 
-Build
------
+Run
+---
 
 To build from source and watch for changes:
 
