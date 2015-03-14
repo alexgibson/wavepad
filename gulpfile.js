@@ -8,23 +8,37 @@ var jshint = require('gulp-jshint');
 var browserify = require('browserify');
 var babelify = require('babelify');
 var uglify = require('gulp-uglify');
+var gulpif = require('gulp-if');
+var minimist = require('minimist');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var del = require('del');
 
-var options = {
+var knownOptions = {
+    string: ['env', 'smp'],
+    default: {
+        env: process.env.NODE_ENV || 'production',
+        smp: '/path/to/project/root/'
+    }
+};
+
+var options = minimist(process.argv.slice(2), knownOptions);
+var _debug = options.env === 'development' ? true : false;
+
+// temp directory for deploy
+var buildOptions = {
     cacheDir: './tmp'
 };
 
-var _debug = false;
-var _sourceMapPath = '/Users/alexgibson/Git/wavepad/';
-
-gulp.task('deploy', ['js:lint', 'js:compile'], function () {
+gulp.task('deploy', ['js:compile'], function () {
     return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
-        .pipe(deploy(options));
+        .pipe(deploy(buildOptions));
 });
 
-gulp.task('js:compile', function() {
+gulp.task('js:compile', ['clean', 'js:lint'], function() {
     browserify({ debug: _debug })
     .transform(babelify.configure({
-      sourceMapRelative: _sourceMapPath
+      sourceMapRelative: options.smp
     }))
     .require('./src/app.js', {
         entry: true
@@ -33,7 +47,10 @@ gulp.task('js:compile', function() {
     .on('error', function (err) {
         console.log('Error : ' + err.message);
     })
-    .pipe(fs.createWriteStream('./dist/bundle.js'));
+    .pipe(source('bundle.js'))
+    .pipe(gulpif(options.env === 'production', buffer()))
+    .pipe(gulpif(options.env === 'production', uglify()))
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('js:lint', function() {
@@ -42,9 +59,15 @@ gulp.task('js:lint', function() {
         .pipe(jshint.reporter('default'));
 });
 
+gulp.task('clean', function (cb) {
+    del([
+        'dist/**',
+    ], cb);
+});
+
 gulp.task('default', function () {
+    gulp.start('js:compile');
     watch('./src/**/*.js', function () {
-        gulp.start('js:lint');
         gulp.start('js:compile');
     });
 });
