@@ -12,15 +12,17 @@ Audio node graph
 
 ![](/images/wavapad-audio-graph.png?raw=true)
 
-Installation
-------------
+Install
+-------
 
 ```
 npm install
 ```
 
-Make it run
------------
+Build
+-----
+
+To build from source and watch for changes:
 
 ```
 gulp
@@ -34,8 +36,10 @@ gulp --env development --smp /path/to/project/root/
 
 Note the `smp` argument is to append the relative path for source maps to work.
 
-Deploy to gh-pages
-------------------
+Deploy
+------
+
+To deploy to `gh-pages` branch:
 
 ```
 gulp deploy
