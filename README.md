@@ -34,8 +34,8 @@ gulp --env development --smp /path/to/project/root/
 
 Note the `smp` argument is to append the relative path for source maps to work.
 
-Deploy to gh-pages branch
--------------------------
+Deploy to gh-pages
+------------------
 
 ```
 gulp deploy
