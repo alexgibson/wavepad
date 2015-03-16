@@ -30,27 +30,27 @@ var buildOptions = {
     cacheDir: './tmp'
 };
 
-gulp.task('deploy', function () {
+gulp.task('deploy', ['js:compile'], function () {
     return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
         .pipe(deploy(buildOptions));
 });
 
 gulp.task('js:compile', ['clean', 'js:lint'], function() {
-    browserify({ debug: _debug })
-    .transform(babelify.configure({
-      sourceMapRelative: options.smp
-    }))
-    .require('./src/app.js', {
-        entry: true
-    })
-    .bundle()
-    .on('error', function (err) {
-        console.log('Error : ' + err.message);
-    })
-    .pipe(source('bundle.js'))
-    .pipe(gulpif(options.env === 'production', buffer()))
-    .pipe(gulpif(options.env === 'production', uglify()))
-    .pipe(gulp.dest('./dist'));
+    return browserify({ debug: _debug })
+        .transform(babelify.configure({
+          sourceMapRelative: options.smp
+        }))
+        .require('./src/app.js', {
+            entry: true
+        })
+        .bundle()
+        .on('error', function (err) {
+            console.log('Error : ' + err.message);
+        })
+        .pipe(source('bundle.js'))
+        .pipe(gulpif(options.env === 'production', buffer()))
+        .pipe(gulpif(options.env === 'production', uglify()))
+        .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('js:lint', function() {
@@ -59,10 +59,8 @@ gulp.task('js:lint', function() {
         .pipe(jshint.reporter('default'));
 });
 
-gulp.task('clean', function (cb) {
-    del([
-        'dist/**',
-    ], cb);
+gulp.task('clean', function () {
+    return  del(['dist/**',]);
 });
 
 gulp.task('default', function () {
