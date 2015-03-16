@@ -60,7 +60,7 @@ gulp.task('js:lint', function() {
 });
 
 gulp.task('clean', function () {
-    return  del(['dist/**',]);
+    return  del(['dist/**']);
 });
 
 gulp.task('default', function () {
