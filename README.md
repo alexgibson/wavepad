@@ -39,7 +39,7 @@ Note the `smp` argument is to append the relative path for source maps to work.
 Deploy
 ------
 
-To deploy to `gh-pages` branch:
+To automatically build and deploy to `gh-pages` branch:
 
 ```
 gulp deploy
