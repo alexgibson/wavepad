@@ -25,14 +25,9 @@ var knownOptions = {
 var options = minimist(process.argv.slice(2), knownOptions);
 var _debug = options.env === 'development' ? true : false;
 
-// temp directory for deploy
-var buildOptions = {
-    cacheDir: './tmp'
-};
-
 gulp.task('deploy', ['js:compile'], function () {
     return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
-        .pipe(deploy(buildOptions));
+        .pipe(deploy());
 });
 
 gulp.task('js:compile', ['clean', 'js:lint'], function() {
