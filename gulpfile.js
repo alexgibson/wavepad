@@ -32,7 +32,7 @@ var buildOptions = {
 
 gulp.task('deploy', ['js:compile'], function () {
     return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
-        .pipe(deploy(buildOptions));
+        .pipe(deploy());
 });
 
 gulp.task('js:compile', ['clean', 'js:lint'], function() {
