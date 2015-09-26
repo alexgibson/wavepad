@@ -29,7 +29,7 @@ class Wavepad {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
         if ('AudioContext' in window) {
-            this.myAudioContext = new AudioContext();
+            this.myAudioContext = new window.AudioContext();
         } else {
             throw new Error('wavepad.js: browser does not support Web Audio API');
         }
@@ -105,7 +105,7 @@ class Wavepad {
     }
 
     handleResize() {
-        var breakPoint = window.matchMedia('(max-width: 512px)');
+        let breakPoint = window.matchMedia('(max-width: 512px)');
         // set default canvas size
         this.isSmallViewport = breakPoint.matches ? true : false;
         this.setCanvasSize();
@@ -176,7 +176,7 @@ class Wavepad {
     start(e) {
         let x = e.type === 'touchstart' ? e.touches[0].pageX : e.pageX;
         let y = e.type === 'touchstart' ? e.touches[0].pageY : e.pageY;
-        const multiplier = this.isSmallViewport ? 2 : 1;
+        let multiplier = this.isSmallViewport ? 2 : 1;
 
         if (e.type === 'touchstart') {
             this.hasTouch = true;
@@ -215,7 +215,7 @@ class Wavepad {
         }
 
         if (this.isPlaying) {
-            const multiplier = this.isSmallViewport ? 2 : 1;
+            let multiplier = this.isSmallViewport ? 2 : 1;
             x = x - this.surface.offsetLeft;
             y = y - this.surface.offsetTop;
             this.source.frequency.value = x * multiplier;
@@ -230,7 +230,7 @@ class Wavepad {
         let y = e.type === 'touchend' ? e.changedTouches[0].pageY : e.pageY;
 
         if (this.isPlaying) {
-            const multiplier = this.isSmallViewport ? 2 : 1;
+            let multiplier = this.isSmallViewport ? 2 : 1;
             x = x - this.surface.offsetLeft;
             y = y - this.surface.offsetTop;
             this.source.frequency.value = x * multiplier;
@@ -279,13 +279,13 @@ class Wavepad {
      */
     setFilterFrequency(y) {
         // min 40Hz
-        const min = 40;
+        let min = 40;
         // max half of the sampling rate
-        const max = this.myAudioContext.sampleRate / 2;
+        let max = this.myAudioContext.sampleRate / 2;
         // Logarithm (base 2) to compute how many octaves fall in the range.
-        const numberOfOctaves = Math.log(max / min) / Math.LN2;
+        let numberOfOctaves = Math.log(max / min) / Math.LN2;
         // Compute a multiplier from 0 to 1 based on an exponential scale.
-        const multiplier = Math.pow(2, numberOfOctaves * (((2 / this.surface.clientHeight) * (this.surface.clientHeight - y)) - 1.0));
+        let multiplier = Math.pow(2, numberOfOctaves * (((2 / this.surface.clientHeight) * (this.surface.clientHeight - y)) - 1.0));
         // Get back to the frequency value between min and max.
         return max * multiplier;
     }
@@ -305,7 +305,7 @@ class Wavepad {
     }
 
     setCanvasSize() {
-        const canvasSize = this.isSmallViewport ? 256 : 512;
+        let canvasSize = this.isSmallViewport ? 256 : 512;
         this.canvas.width = this.canvas.height = canvasSize - 10;
         // set canvas graph color
         this.ctx.fillStyle = this.options.barColor;
@@ -315,17 +315,17 @@ class Wavepad {
      * Draw the canvas frequency data graph
      */
     drawSpectrum() {
-        const canvasSize = this.isSmallViewport ? 256 : 512;
-        const barWidth = this.isSmallViewport ? 10 : 20;
-        const barCount = Math.round(canvasSize / barWidth);
-        const freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
+        let canvasSize = this.isSmallViewport ? 256 : 512;
+        let barWidth = this.isSmallViewport ? 10 : 20;
+        let barCount = Math.round(canvasSize / barWidth);
+        let freqByteData = new Uint8Array(this.myAudioAnalyser.frequencyBinCount);
 
         this.myAudioAnalyser.getByteFrequencyData(freqByteData);
         this.ctx.clearRect(0, 0, canvasSize, canvasSize);
 
         for (let i = 0; i < barCount; i += 1) {
-            const magnitude = freqByteData[i];
-            const multiplier = this.isSmallViewport ? 1 : 2;
+            let magnitude = freqByteData[i];
+            let multiplier = this.isSmallViewport ? 1 : 2;
             // some values need adjusting to fit on the canvas
             this.ctx.fillRect(barWidth * i, canvasSize, barWidth - 1, -magnitude * multiplier);
         }
