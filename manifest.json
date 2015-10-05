@@ -5,7 +5,7 @@
   "version": "1",
   "app": {
     "launch": {
-      "web_url": "http://alxgbsn.co.uk/wavepad"
+      "web_url": "https://alexgibson.github.io/wavepad"
     }
   },
   "icons": {
