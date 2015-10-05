@@ -5,7 +5,7 @@ Wave-PD1
 
 An experimental synthesizer built using the [Web Audio API](http://www.w3.org/TR/webaudio/), written in ES6 and compiled using [Babel](https://babeljs.io/).
 
-http://alxgbsn.co.uk/wavepad
+https://alexgibson.github.io/wavepad
 
 ![](/images/screenshot.png?raw=true)
 
