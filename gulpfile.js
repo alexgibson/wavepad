@@ -26,8 +26,8 @@ var options = minimist(process.argv.slice(2), knownOptions);
 var _debug = options.env === 'development' ? true : false;
 
 gulp.task('deploy', ['js:compile'], function () {
-    return gulp.src(['./**/*', '!./node_modules/**', '!./tmp/**'])
-        .pipe(deploy());
+    return gulp.src(['./**/*', '!./node_modules/**', '!./publish/**'])
+        .pipe(deploy({ cacheDir: '.publish' }));
 });
 
 gulp.task('js:compile', ['clean', 'js:lint'], function() {
@@ -64,5 +64,3 @@ gulp.task('default', function () {
         gulp.start('js:compile');
     });
 });
-
-
