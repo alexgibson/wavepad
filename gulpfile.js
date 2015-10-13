@@ -1,6 +1,5 @@
 'use strict';
 
-var fs = require('fs');
 var gulp = require('gulp');
 var watch = require('gulp-watch');
 var deploy = require('gulp-gh-pages');
@@ -26,7 +25,7 @@ var options = minimist(process.argv.slice(2), knownOptions);
 var _debug = options.env === 'development' ? true : false;
 
 gulp.task('deploy', ['js:compile'], function () {
-    return gulp.src(['./**/*', '!./node_modules/**', '!./publish/**'])
+    return gulp.src(['./**/*', '!./node_modules/**'])
         .pipe(deploy({ cacheDir: '.publish' }));
 });
 
