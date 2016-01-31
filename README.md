@@ -21,8 +21,8 @@ Install
 npm install
 ```
 
-Run
----
+Build
+-----
 
 To build from source and watch for changes:
 
@@ -37,6 +37,17 @@ gulp --env development --smp /path/to/project/root/
 ```
 
 Note the `smp` argument is to append the relative path for source maps to work.
+
+Run
+---
+
+To run the server:
+
+```
+cd dist && python -m SimpleHTTPServer
+```
+
+The app can then be viewed at `localhost:8000`.
 
 Deploy
 ------

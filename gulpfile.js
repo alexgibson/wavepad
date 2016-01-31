@@ -74,7 +74,7 @@ gulp.task('js:lint', function() {
 
 gulp.task('default', function () {
     gulp.start('build');
-    watch('./src/**/*.js', function () {
-        gulp.start('build');
+    watch('./src/**/*', function () {
+        runSequence('js:compile', 'copy');
     });
 });
