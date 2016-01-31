@@ -1,4 +1,3 @@
-import rAF from './rAF';
 import Wavepad from './wavepad';
 
 window.addEventListener('DOMContentLoaded', () => {
