@@ -20,7 +20,7 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
-  "homepage": "http://alxgbsn.co.uk/wavepad",
+  "homepage": "https://alexgibson.github.io/wavepad/",
   "repository": {
     "type": "git",
     "url": "https://github.com/alexgibson/wavepad.git"
