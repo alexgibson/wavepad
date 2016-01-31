@@ -5,7 +5,7 @@ Wave-PD1
 
 An experimental synthesizer built using the [Web Audio API](http://www.w3.org/TR/webaudio/), written in ES6 and compiled using [Babel](https://babeljs.io/).
 
-https://alexgibson.github.io/wavepad
+https://alexgibson.github.io/wavepad/
 
 ![](/images/screenshot.png?raw=true)
 
@@ -30,7 +30,7 @@ To build from source and watch for changes:
 gulp
 ```
 
-By default Javascript is compiled and minified in production mode. To run unminified and with source maps enabled, simply run:
+By default Javascript is compiled and minified in production mode. To run un-minified and with source maps enabled, simply run:
 
 ```
 gulp --env development --smp /path/to/project/root/
