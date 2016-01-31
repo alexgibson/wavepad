@@ -10,11 +10,11 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    navigator.serviceWorker.register('/sw.js', {
+    navigator.serviceWorker.register('sw.js', {
         scope: './'
     }).then(function() {
         console.log('Registration worked!');
-    }).catch(function() {
-        console.log('Registration failed!');
+    }).catch(function(err) {
+        console.log('Registration failed! ', err);
     });
 });
