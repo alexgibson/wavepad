@@ -25,7 +25,11 @@ var knownOptions = {
 var options = minimist(process.argv.slice(2), knownOptions);
 var _debug = options.env === 'development' ? true : false;
 
-gulp.task('deploy', ['build'], function () {
+gulp.task('deploy', function () {
+    return runSequence('clean', ['js:compile', 'copy'], 'push');
+});
+
+gulp.task('push', function() {
     return gulp.src(['./dist/**/*'])
         .pipe(deploy({ cacheDir: '.publish' }));
 });
@@ -33,6 +37,14 @@ gulp.task('deploy', ['build'], function () {
 gulp.task('copy', function() {
     return gulp.src(['./src/**/*', '!./src/js/*'])
         .pipe(gulp.dest('dist'));
+});
+
+gulp.task('clean', function () {
+    return  del(['dist']);
+});
+
+gulp.task('build', function() {
+    return runSequence('clean', ['js:compile', 'copy']);
 });
 
 gulp.task('js:compile', ['js:lint'], function() {
@@ -58,14 +70,6 @@ gulp.task('js:lint', function() {
     return gulp.src('./src/**/*.js')
         .pipe(jshint({ esnext: true }))
         .pipe(jshint.reporter('default'));
-});
-
-gulp.task('clean', function () {
-    return  del(['dist/**']);
-});
-
-gulp.task('build', function() {
-    return runSequence('clean', ['js:compile', 'copy']);
 });
 
 gulp.task('default', function () {
