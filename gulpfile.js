@@ -12,6 +12,7 @@ var minimist = require('minimist');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var del = require('del');
+var runSequence = require('run-sequence');
 
 var knownOptions = {
     string: ['env', 'smp'],
@@ -24,18 +25,23 @@ var knownOptions = {
 var options = minimist(process.argv.slice(2), knownOptions);
 var _debug = options.env === 'development' ? true : false;
 
-gulp.task('deploy', ['js:compile'], function () {
-    return gulp.src(['./**/*', '!./node_modules/**'])
+gulp.task('deploy', ['js:compile', 'copy'], function () {
+    return gulp.src(['./dist/**/*'])
         .pipe(deploy({ cacheDir: '.publish' }));
 });
 
-gulp.task('js:compile', ['clean', 'js:lint'], function() {
+gulp.task('copy', function() {
+    return gulp.src(['./src/**/*', '!./src/js/*'])
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task('js:compile', ['js:lint'], function() {
     return browserify({ debug: _debug })
         .transform(babelify.configure({
           sourceMapRelative: options.smp,
           presets: ['es2015']
         }))
-        .require('./src/app.js', {
+        .require('./src/js/app.js', {
             entry: true
         })
         .bundle()
@@ -45,7 +51,7 @@ gulp.task('js:compile', ['clean', 'js:lint'], function() {
         .pipe(source('bundle.js'))
         .pipe(gulpif(options.env === 'production', buffer()))
         .pipe(gulpif(options.env === 'production', uglify()))
-        .pipe(gulp.dest('./dist'));
+        .pipe(gulp.dest('./dist/js/'));
 });
 
 gulp.task('js:lint', function() {
@@ -59,8 +65,8 @@ gulp.task('clean', function () {
 });
 
 gulp.task('default', function () {
-    gulp.start('js:compile');
+    runSequence('clean', ['js:compile', 'copy']);
     watch('./src/**/*.js', function () {
-        gulp.start('js:compile');
+        runSequence('clean', ['js:compile', 'copy']);
     });
 });
