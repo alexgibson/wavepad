@@ -1,0 +1,31 @@
+{
+  "lang": "en",
+  "name": "Wave-PD1",
+  "short_name": "WPD1",
+  "icons": [
+    {
+      "src": "images/iOS-57.png",
+      "sizes": "57x57",
+      "type": "image/png"
+    },
+    {
+      "src": "images/iOS-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "images/iOS-114.png",
+      "sizes": "114x114",
+      "type": "image/png"
+    },
+    {
+      "src": "images/iOS-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#d81f38"
+}
