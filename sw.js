@@ -1,12 +1,13 @@
 /* globals self, caches */
 
-var staticCacheName = 'wave-pd1-v8';
+var staticCacheName = 'wave-pd1-v9';
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(staticCacheName).then(function(cache) {
             return cache.addAll([
                 './',
+                'index.html',
                 'js/bundle.js',
                 'css/styles.css',
                 'favicon.ico',
