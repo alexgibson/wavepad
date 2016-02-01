@@ -1,6 +1,6 @@
 /* globals self, caches */
 
-var staticCacheName = 'wave-pd1-v3';
+var staticCacheName = 'wave-pd1-v4';
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
