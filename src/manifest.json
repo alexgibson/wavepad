@@ -2,6 +2,7 @@
   "lang": "en",
   "name": "Wave-PD1",
   "short_name": "WPD1",
+  "scope": "/",
   "icons": [
     {
       "src": "images/iOS-57.png",
