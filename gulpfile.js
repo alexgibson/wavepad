@@ -40,7 +40,7 @@ gulp.task('copy', function() {
 });
 
 gulp.task('clean', function () {
-    return  del(['dist']);
+    return  del(['dist/**/*']);
 });
 
 gulp.task('build', function() {
