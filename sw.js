@@ -1,14 +1,16 @@
 /* globals self, caches */
 
-var staticCacheName = 'wave-pd1-v1';
+var staticCacheName = 'wave-pd1-v2';
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(staticCacheName).then(function(cache) {
             return cache.addAll([
-                '/',
+                './',
                 'js/bundle.js',
-                'css/styles.css'
+                'css/styles.css',
+                'favicon.ico',
+                'images/iOS-144.png'
             ]);
         })
     );
