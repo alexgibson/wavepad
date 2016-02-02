@@ -1,6 +1,6 @@
 /* globals self, caches */
 
-var staticCacheName = 'wave-pd1-v9';
+var staticCacheName = 'wave-pd1-v10';
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
@@ -13,6 +13,8 @@ self.addEventListener('install', function(event) {
                 'favicon.ico',
                 'images/iOS-144.png'
             ]);
+        }).then(function() {
+            return self.skipWaiting();
         })
     );
 });
@@ -28,6 +30,8 @@ self.addEventListener('activate', function(event) {
                         return caches.delete(cacheName);
                     })
             );
+        }).then(function() {
+            self.clients.claim();
         })
     );
 });
