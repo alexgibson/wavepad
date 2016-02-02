@@ -5,29 +5,31 @@ function registerServiceWorker() {
     }
 
     function trackInstalling(worker) {
-        console.log('Service Worker update installing...');
+        console.log('Service Worker: installing...');
         worker.addEventListener('statechange', function() {
             if (worker.state === 'installed') {
-                updateReady();
+                onInstalled();
+            } else if (worker.state === 'activated') {
+                console.log('Service Worker: activated');
             }
         });
     }
 
-    function updateReady() {
-        console.log('New Service Worker is ready!');
+    function onInstalled() {
+        console.log('Service Worker: installed');
     }
 
     navigator.serviceWorker.register('sw.js', {
         scope: './'
     }).then(function(reg) {
-        console.log('Service Worker registered!');
+        console.log('Service Worker: registered');
 
         if (!navigator.serviceWorker.controller) {
             return;
         }
 
         if (reg.waiting) {
-            updateReady();
+            onInstalled();
             return;
         }
 
@@ -41,7 +43,7 @@ function registerServiceWorker() {
         });
 
     }).catch(function(err) {
-        console.log('Service Worker registration failed! ', err);
+        console.log('Service Worker: registration failed ', err);
     });
 }
 
