@@ -50,8 +50,7 @@ gulp.task('build', function() {
 gulp.task('js:compile', ['js:lint'], function() {
     return browserify({ debug: _debug })
         .transform(babelify.configure({
-          sourceMapRelative: options.smp,
-          presets: ['es2015']
+          sourceMapRelative: options.smp
         }))
         .require('./src/js/app.js', {
             entry: true
