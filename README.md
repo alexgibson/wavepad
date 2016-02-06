@@ -44,10 +44,10 @@ Run
 To run the server:
 
 ```
-cd dist && python -m SimpleHTTPServer
+npm start
 ```
 
-The app can then be viewed at `localhost:8000`.
+The app can then be viewed at `localhost:8080`.
 
 Deploy
 ------
