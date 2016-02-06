@@ -1,5 +1,7 @@
 /* globals self, caches */
 
+'use strict';
+
 var staticCacheName = 'wave-pd1-v10';
 
 self.addEventListener('install', function(event) {
