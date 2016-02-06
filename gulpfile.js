@@ -13,6 +13,7 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var del = require('del');
 var runSequence = require('run-sequence');
+var browserSync = require('browser-sync');
 
 var knownOptions = {
     string: ['env', 'smp'],
@@ -69,6 +70,15 @@ gulp.task('js:lint', function() {
     return gulp.src('./src/**/*.js')
         .pipe(jshint({ esnext: true }))
         .pipe(jshint.reporter('default'));
+});
+
+gulp.task('browser-sync', function() {
+  browserSync({
+    notify: false,
+    port: 8000,
+    server: 'dist',
+    open: false
+  });
 });
 
 gulp.task('default', function () {

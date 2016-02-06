@@ -4,12 +4,14 @@
   "description": "An experimental synthesizer built using the Web Audio API.",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "gulp browser-sync"
   },
   "dependencies": {},
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
     "babelify": "^7.2.0",
+    "browser-sync": "^2.11.1",
     "browserify": "^13.0.0",
     "del": "^2.0.2",
     "gulp": "^3.8.10",

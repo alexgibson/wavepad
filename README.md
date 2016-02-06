@@ -41,10 +41,10 @@ Note the `smp` argument is to append the relative path for source maps to work.
 Run
 ---
 
-To run the server:
+To run the dev server:
 
 ```
-cd dist && python -m SimpleHTTPServer
+npm start
 ```
 
 The app can then be viewed at `localhost:8000`.
