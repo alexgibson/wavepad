@@ -7,6 +7,7 @@ const staticCacheName = staticCachePrefix + version;
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(staticCacheName).then(cache => {
+            // cache all the static assets required for offline use.
             return cache.addAll([
                 './',
                 'index.html',
@@ -16,6 +17,7 @@ self.addEventListener('install', event => {
                 'images/iOS-144.png'
             ]);
         }).then(() => {
+            // activate the new service worker immediately, without waiting for next load.
             return self.skipWaiting();
         })
     );
@@ -24,6 +26,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
+            // remove any old caches once the new service worker is activated.
             return Promise.all(
                 cacheNames.filter(cacheName => {
                     return cacheName.startsWith(staticCachePrefix) && cacheName !== staticCacheName;
@@ -32,6 +35,7 @@ self.addEventListener('activate', event => {
                 })
             );
         }).then(() => {
+            // tell service worker to take control of any open pages.
             self.clients.claim();
         })
     );
@@ -47,7 +51,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // for non-GET requests, go to the network
+    // for non-GET requests, go to the network.
     if (request.method !== 'GET') {
         event.respondWith(fetch(request));
         return;
