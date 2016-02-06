@@ -1,5 +1,3 @@
-/* globals self, caches */
-
 'use strict';
 
 const version = 'v1';

@@ -1,5 +1,9 @@
 {
 	"browser": true,
 	"esnext": true,
-  "browserify": true
+	"browserify": true,
+	"globals": {
+		"self": false,
+		"caches": false
+	}
 }
