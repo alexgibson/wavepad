@@ -6,7 +6,7 @@ function registerServiceWorker() {
 
     function trackInstalling(worker) {
         console.log('Service Worker: installing...');
-        worker.addEventListener('statechange', function() {
+        worker.addEventListener('statechange', () => {
             if (worker.state === 'installed') {
                 onInstalled();
             } else if (worker.state === 'activated') {
@@ -21,7 +21,7 @@ function registerServiceWorker() {
 
     navigator.serviceWorker.register('sw.js', {
         scope: './'
-    }).then(function(reg) {
+    }).then(reg => {
         console.log('Service Worker: registered');
 
         if (!navigator.serviceWorker.controller) {
@@ -38,11 +38,11 @@ function registerServiceWorker() {
             return;
         }
 
-        reg.addEventListener('updatefound', function() {
+        reg.addEventListener('updatefound', () => {
             trackInstalling(reg.installing);
         });
 
-    }).catch(function(err) {
+    }).catch(err => {
         console.log('Service Worker: registration failed ', err);
     });
 }
