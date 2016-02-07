@@ -1,6 +1,6 @@
 'use strict';
 
-const version = 'v1';
+const version = 'v1.01';
 const staticCachePrefix = 'wave-pd1-static-';
 const staticCacheName = staticCachePrefix + version;
 

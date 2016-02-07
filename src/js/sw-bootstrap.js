@@ -7,16 +7,8 @@ function registerServiceWorker() {
     function trackInstalling(worker) {
         console.log('Service Worker: installing...');
         worker.addEventListener('statechange', () => {
-            if (worker.state === 'installed') {
-                onInstalled();
-            } else if (worker.state === 'activated') {
-                console.log('Service Worker: activated');
-            }
+            console.log('Service Worker: ', worker.state);
         });
-    }
-
-    function onInstalled() {
-        console.log('Service Worker: installed');
     }
 
     navigator.serviceWorker.register('sw.js', {
@@ -29,7 +21,7 @@ function registerServiceWorker() {
         }
 
         if (reg.waiting) {
-            onInstalled();
+            console.log('Service Worker: installed');
             return;
         }
 
