@@ -2,7 +2,7 @@
   "lang": "en",
   "name": "Wave-PD1",
   "short_name": "WPD1",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     {
       "src": "images/iOS-144.png",
@@ -10,7 +10,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/wavepad/",
+  "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
